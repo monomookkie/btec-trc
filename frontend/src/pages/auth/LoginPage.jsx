@@ -128,7 +128,7 @@ export default function LoginPage({ onLogin, onRegister }) {
         {err && <div className="mt-3 flex items-center gap-2 text-red-600 text-xs bg-red-50 px-3 py-2 rounded-lg"><Icon name="x" size={12}/>{err}</div>}
         <button onClick={handleLogin} disabled={loading}
           className="mt-4 w-full py-3 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-medium text-sm transition-colors disabled:opacity-60">
-          {loading ? 'Signing in…' : 'Sign In to LMS'}
+          {loading ? 'Signing in…' : 'Sign In'}
         </button>
         <div className="flex justify-between mt-3.5 text-xs">
           <button onClick={() => { setView('register'); setRegErr({}); }} className="text-brand-500 font-medium hover:underline">Register</button>
