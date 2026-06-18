@@ -4,12 +4,6 @@ import { api } from '../../api';
 
 const ALLOWED_DOMAIN = 'redcross.or.th';
 
-const DEMO_ACCOUNTS = [
-  { label: 'Admin (Dr. Chen)', email: 'admin@hemolabs.org', pass: 'admin123' },
-  { label: 'James Ramos',      email: 'james@hemolabs.org',  pass: 'pass123' },
-  { label: 'Priya Nair',       email: 'priya@hemolabs.org',  pass: 'pass123' },
-  { label: 'Marcus Webb',      email: 'marcus@hemolabs.org', pass: 'pass123' },
-];
 
 export default function LoginPage({ onLogin, onRegister }) {
   const [view, setView] = useState('login');
@@ -120,17 +114,6 @@ export default function LoginPage({ onLogin, onRegister }) {
   if (view === 'login') {
     body = (
       <div className="px-9 pb-8 pt-6">
-        <div className="mb-5">
-          <div className="text-xs text-slate-400 font-medium mb-2">Quick access — click to fill</div>
-          <div className="grid grid-cols-2 gap-1.5">
-            {DEMO_ACCOUNTS.map(a => (
-              <button key={a.email} onClick={() => { setEmail(a.email); setPass(a.pass); setErr(''); }}
-                className="text-left px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-xs font-medium text-slate-600 hover:bg-slate-100 transition-colors">
-                {a.label}
-              </button>
-            ))}
-          </div>
-        </div>
         <div className="space-y-4">
           <div>
             <label className="block text-xs font-medium text-slate-500 mb-1.5">Email Address</label>
