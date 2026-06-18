@@ -26,11 +26,10 @@ export default function Sidebar({ user, onLogout, onClose }) {
       {/* Logo */}
       <div className="px-4 py-5 border-b border-white/5 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg flex items-center justify-center font-mono font-bold text-white text-sm"
-            style={{ background: 'rgba(26,86,219,.3)', border: '1.5px solid rgba(26,86,219,.5)' }}>HML</div>
+          <img src="/logo.png" alt="Logo" className="w-9 h-9 object-contain" />
           <div>
-            <div className="text-white text-sm font-semibold">HemoLabs LMS</div>
-            <div className="text-white/30 text-[10px] mt-0.5">Learning Platform v2.0</div>
+            <div className="text-white text-sm font-semibold">Blood Testing Education Center</div>
+            <div className="text-white/30 text-[10px] mt-0.5">National Blood Center, Thai Red Cross Society</div>
           </div>
         </div>
         {/* Close button — mobile only */}
