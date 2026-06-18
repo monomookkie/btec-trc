@@ -20,7 +20,7 @@ export default function TopBar({ user, onMenuClick }) {
   const title = titles[pathname] || 'HemoLabs LMS';
 
   return (
-    <div className="h-14 bg-white border-b border-slate-100 px-4 md:px-7 flex items-center justify-between flex-shrink-0">
+    <div className="h-14 bg-white border-b border-slate-100 px-4 md:px-7 flex items-center justify-between flex-shrink-0" style={{ paddingTop: 'env(safe-area-inset-top)', height: 'calc(3.5rem + env(safe-area-inset-top))' }}>
       <div className="flex items-center gap-3">
         {/* Hamburger — mobile only */}
         <button onClick={onMenuClick} className="lg:hidden p-1.5 rounded-lg hover:bg-slate-100 text-slate-500">
