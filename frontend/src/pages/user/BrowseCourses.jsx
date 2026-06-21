@@ -32,8 +32,18 @@ export default function BrowseCourses({ user, showToast }) {
   const [ytPlaying, setYtPlaying] = useState({});
   const [ytVolume, setYtVolume] = useState({});
   const [ytEnded, setYtEnded] = useState({});
+  const [ytShowControls, setYtShowControls] = useState({});
   const ytRefs = useRef({});
   const ytContainerRefs = useRef({});
+  const ytControlTimers = useRef({});
+
+  const showControls = (materialId) => {
+    setYtShowControls(s => ({ ...s, [materialId]: true }));
+    clearTimeout(ytControlTimers.current[materialId]);
+    ytControlTimers.current[materialId] = setTimeout(() => {
+      setYtShowControls(s => ({ ...s, [materialId]: false }));
+    }, 3000);
+  };
 
   const getYouTubeEmbedUrl = (url) => {
     try {
@@ -124,6 +134,9 @@ export default function BrowseCourses({ user, showToast }) {
     setYtPlaying({});
     setYtVolume({});
     setYtEnded({});
+    setYtShowControls({});
+    Object.values(ytControlTimers.current).forEach(clearTimeout);
+    ytControlTimers.current = {};
     ytRefs.current = {};
     ytContainerRefs.current = {};
     setViewCourse(null);
@@ -328,7 +341,12 @@ export default function BrowseCourses({ user, showToast }) {
                           {/* YouTube embed */}
                           {expandedMat === m.id && getYouTubeEmbedUrl(m.url) && (
                             <div ref={el => ytContainerRefs.current[m.id] = el}
-                              className="rounded-xl overflow-hidden border border-slate-200 aspect-video w-full relative bg-black">
+                              className="rounded-xl overflow-hidden border border-slate-200 aspect-video w-full relative bg-black"
+                              onMouseMove={() => showControls(m.id)}
+                              onMouseLeave={() => {
+                                clearTimeout(ytControlTimers.current[m.id]);
+                                setYtShowControls(s => ({ ...s, [m.id]: false }));
+                              }}>
                               {/* iframe — pointer-events:none blocks seek */}
                               <iframe
                                 ref={el => ytRefs.current[m.id] = el}
@@ -336,27 +354,29 @@ export default function BrowseCourses({ user, showToast }) {
                                 className="w-full h-full pointer-events-none"
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                               />
-                              {/* Transparent click area — play/pause on click, no visible UI */}
-                              <div className="absolute inset-0 bottom-10 cursor-pointer"
-                                onClick={() => toggleYtPlay(m.id)} />
-                              {/* Custom control bar */}
-                              <div className="absolute bottom-0 left-0 right-0 flex items-center gap-3 px-4 py-2.5 bg-gradient-to-t from-black/70 to-transparent">
+                              {/* Transparent area — play/pause + show controls on touch */}
+                              <div className="absolute inset-0 bottom-12 cursor-pointer"
+                                onClick={() => toggleYtPlay(m.id)}
+                                onTouchStart={() => showControls(m.id)} />
+                              {/* Control bar — hidden, shows on hover/touch */}
+                              <div className={`absolute bottom-0 left-0 right-0 flex items-center gap-3 px-4 py-3 bg-gradient-to-t from-black/80 to-transparent transition-opacity duration-300 ${ytShowControls[m.id] ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
                                 <button onClick={() => toggleYtPlay(m.id)}
-                                  className="text-white hover:text-white/80 transition-colors text-base w-6 text-center">
+                                  className="text-white hover:text-white/80 transition-colors text-base w-6 text-center select-none">
                                   {ytPlaying[m.id] ? '⏸' : '▶'}
                                 </button>
-                                <span className="text-white text-sm">
+                                <span className="text-white text-sm select-none">
                                   {(ytVolume[m.id] ?? 100) === 0 ? '🔇' : '🔊'}
                                 </span>
                                 <input
                                   type="range" min="0" max="100"
                                   value={ytVolume[m.id] ?? 100}
                                   onChange={e => changeYtVolume(m.id, Number(e.target.value))}
-                                  className="w-20 accent-white cursor-pointer"
+                                  onTouchStart={e => e.stopPropagation()}
+                                  className="w-24 accent-white cursor-pointer"
                                 />
                                 <div className="flex-1" />
                                 <button onClick={() => toggleYtFullscreen(m.id)}
-                                  className="text-white hover:text-white/80 transition-colors text-sm">
+                                  className="text-white hover:text-white/80 transition-colors text-lg select-none">
                                   ⛶
                                 </button>
                               </div>
