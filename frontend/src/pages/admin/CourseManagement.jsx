@@ -58,6 +58,13 @@ export default function CourseManagement({ showToast }) {
     api.getUsers().then(setUsers);
   }, []);
 
+  // Re-fetch users every time the assign tab is opened
+  useEffect(() => {
+    if (showModal && modalTab === 'assign') {
+      api.getUsers().then(setUsers);
+    }
+  }, [showModal, modalTab]);
+
   const filtered =
     filter === "all"
       ? courses

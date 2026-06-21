@@ -29,15 +29,30 @@ export default function BrowseCourses({ user, showToast }) {
   const CONFIRM_SECONDS = 30;
   const [expandedMat, setExpandedMat] = useState(null);
 
+  const [ytPlaying, setYtPlaying] = useState({});
+  const ytRefs = useRef({});
+
   const getYouTubeEmbedUrl = (url) => {
     try {
       const u = new URL(url);
       let videoId = null;
       if (u.hostname.includes('youtube.com')) videoId = u.searchParams.get('v');
       else if (u.hostname === 'youtu.be') videoId = u.pathname.slice(1);
-      if (videoId) return `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+      if (videoId) return `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&disablekb=1&rel=0&modestbranding=1&enablejsapi=1`;
     } catch (_) {}
     return null;
+  };
+
+  const ytCommand = (materialId, func) => {
+    const iframe = ytRefs.current[materialId];
+    if (!iframe) return;
+    iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func }), '*');
+  };
+
+  const toggleYtPlay = (materialId) => {
+    const playing = ytPlaying[materialId];
+    ytCommand(materialId, playing ? 'pauseVideo' : 'playVideo');
+    setYtPlaying(s => ({ ...s, [materialId]: !playing }));
   };
 
   const startCountdown = (materialId) => {
@@ -62,6 +77,8 @@ export default function BrowseCourses({ user, showToast }) {
     countdownRefs.current = {};
     setMatCountdown({});
     setExpandedMat(null);
+    setYtPlaying({});
+    ytRefs.current = {};
     setViewCourse(null);
   };
 
@@ -77,14 +94,24 @@ export default function BrowseCourses({ user, showToast }) {
 
   const getEnrollment = (courseId) => enrollments.find(e => e.courseId === courseId);
 
-  const handleOpenMaterial = (m) => {
-    const embedUrl = getYouTubeEmbedUrl(m.url);
-    if (embedUrl) {
-      setExpandedMat(m.id);
+  const getInlineEmbedUrl = (m) => {
+    if (!m.url || m.url === '#') return null;
+    const ytUrl = getYouTubeEmbedUrl(m.url);
+    if (ytUrl) return { type: 'youtube', src: ytUrl };
+    if (m.type === 'pdf') return { type: 'iframe', src: m.url };
+    if (m.type === 'word' || m.type === 'ppt')
+      return { type: 'iframe', src: `https://docs.google.com/viewer?url=${encodeURIComponent(m.url)}&embedded=true` };
+    return null;
+  };
+
+  const handleOpenMaterial = (m, isDone) => {
+    const embed = getInlineEmbedUrl(m);
+    if (embed) {
+      setExpandedMat(prev => prev === m.id ? null : m.id);
     } else if (m.url && m.url !== '#') {
       window.open(m.url, '_blank');
     }
-    startCountdown(m.id);
+    if (!isDone) startCountdown(m.id);
   };
 
   const handleConfirmMaterial = async (m, enr) => {
@@ -245,24 +272,52 @@ export default function BrowseCourses({ user, showToast }) {
                                 +{m.weight}%
                               </span>
                             )}
-                            {m.url && m.url !== '#' && !isDone && (
-                              <button onClick={() => handleOpenMaterial(m)}
-                                className="text-xs flex-shrink-0 text-brand-500 hover:text-brand-700 transition-colors">
-                                Open →
-                              </button>
-                            )}
+                            {m.url && m.url !== '#' && (() => {
+                              const embed = getInlineEmbedUrl(m);
+                              const label = embed
+                                ? embed.type === 'youtube'
+                                  ? (expandedMat === m.id ? 'ซ่อน ↑' : 'ดูวิดีโอ ▶')
+                                  : (expandedMat === m.id ? 'ซ่อน ↑' : 'เปิดดู →')
+                                : 'Open →';
+                              return (
+                                <button onClick={() => handleOpenMaterial(m, isDone)}
+                                  className={`text-xs flex-shrink-0 transition-colors ${isDone ? 'text-emerald-600 hover:text-emerald-700' : 'text-brand-500 hover:text-brand-700'}`}>
+                                  {label}
+                                </button>
+                              );
+                            })()}
                           </div>
-                          {/* YouTube embed */}
-                          {!isDone && expandedMat === m.id && getYouTubeEmbedUrl(m.url) && (
-                            <div className="rounded-xl overflow-hidden border border-slate-200 aspect-video w-full">
-                              <iframe
-                                src={getYouTubeEmbedUrl(m.url)}
-                                className="w-full h-full"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                              />
-                            </div>
-                          )}
+                          {/* Inline embed */}
+                          {expandedMat === m.id && (() => {
+                            const embed = getInlineEmbedUrl(m);
+                            if (!embed) return null;
+                            if (embed.type === 'youtube') return (
+                              <div className="rounded-xl overflow-hidden border border-slate-200 aspect-video w-full relative">
+                                <iframe
+                                  ref={el => ytRefs.current[m.id] = el}
+                                  src={embed.src}
+                                  className="w-full h-full pointer-events-none"
+                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                />
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                                  <button
+                                    onClick={() => toggleYtPlay(m.id)}
+                                    className="w-14 h-14 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition-colors">
+                                    {ytPlaying[m.id] ? <span className="text-xl">⏸</span> : <span className="text-xl pl-1">▶</span>}
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                            return (
+                              <div className="rounded-xl overflow-hidden border border-slate-200 w-full" style={{ height: '480px' }}>
+                                <iframe
+                                  src={embed.src}
+                                  className="w-full h-full"
+                                  title={m.title}
+                                />
+                              </div>
+                            );
+                          })()}
                           {/* Confirm row — shows after opening, hides when done */}
                           {!isDone && matCountdown[m.id] !== undefined && (
                             <div className="flex items-center gap-2 pl-8">
