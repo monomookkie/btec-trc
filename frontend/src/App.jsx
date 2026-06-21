@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import { useToast } from './hooks/useToast';
@@ -21,7 +21,33 @@ import MyCertificates from './pages/user/MyCertificates';
 import MyReport from './pages/user/MyReport';
 import ProfilePage from './pages/ProfilePage';
 
+function useAutoReload() {
+  useEffect(() => {
+    const getCurrentHash = () => {
+      const s = [...document.querySelectorAll('script[src]')].find(el => el.src.includes('/assets/index-'));
+      return s ? s.src : null;
+    };
+    const currentHash = getCurrentHash();
+    if (!currentHash) return;
+
+    const check = async () => {
+      try {
+        const res = await fetch('/?_=' + Date.now(), { cache: 'no-store' });
+        const html = await res.text();
+        const match = html.match(/\/assets\/index-[^"']+\.js/);
+        if (match && !currentHash.includes(match[0])) {
+          window.location.reload();
+        }
+      } catch {}
+    };
+
+    const timer = setInterval(check, 60 * 1000);
+    return () => clearInterval(timer);
+  }, []);
+}
+
 function AppLayout({ user, onUpdateUser, onLogout, showToast }) {
+  useAutoReload();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pageProps = { user, showToast };
 
