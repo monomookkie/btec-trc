@@ -13,6 +13,7 @@ export default function CertificateEngine({ showToast }) {
   const [externalCerts, setExternalCerts] = useState([]);
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
+  const [extSearch, setExtSearch] = useState('');
   const [tab, setTab] = useState('certs');
   const [confirmDel, setConfirmDel] = useState(null);
   const [showIssue, setShowIssue] = useState(false);
@@ -151,9 +152,14 @@ export default function CertificateEngine({ showToast }) {
 
       {tab === 'external' && (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-          <div className="px-5 py-3 border-b border-slate-100 flex justify-end">
-            <button onClick={() => setShowAddExt(true)} className="flex items-center gap-2 px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-sm font-medium transition-colors">
-              <Icon name="plus" size={14} /> Add External Cert
+          <div className="px-5 py-3 border-b border-slate-100 flex items-center gap-3">
+            <div className="relative flex-1">
+              <Icon name="search" size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input value={extSearch} onChange={e => setExtSearch(e.target.value)} placeholder="Search by user or certificate name…"
+                className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:border-brand-500" />
+            </div>
+            <button onClick={() => setShowAddExt(true)} className="flex items-center gap-2 px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-sm font-medium transition-colors flex-shrink-0">
+              <Icon name="plus" size={14} /> Add
             </button>
           </div>
           <table className="w-full">
@@ -165,7 +171,10 @@ export default function CertificateEngine({ showToast }) {
               </tr>
             </thead>
             <tbody>
-              {externalCerts.map(c => {
+              {externalCerts.filter(c => {
+                const q = extSearch.toLowerCase();
+                return !q || c.user?.name?.toLowerCase().includes(q) || c.title?.toLowerCase().includes(q) || c.issuer?.toLowerCase().includes(q);
+              }).map(c => {
                 const openFile = () => {
                   if (!c.fileData) return;
                   const mime = c.fileData.split(';')[0].replace('data:', '');
