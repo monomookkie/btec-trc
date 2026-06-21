@@ -156,53 +156,54 @@ export default function UserDashboard({ user, showToast }) {
 
       {/* Announcement Popup */}
       {popupAnn && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6"
-          style={{ background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(4px)' }}
+        <div className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ background: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(6px)', padding: '16px' }}
           onClick={closePopup}>
-          <div className="bg-white rounded-3xl shadow-2xl w-full overflow-hidden"
-            style={{ maxWidth: 480, maxHeight: '90vh' }}
+          <div style={{ width: '100%', maxWidth: 560, borderRadius: 24, overflow: 'hidden', boxShadow: '0 25px 60px rgba(0,0,0,0.35)' }}
             onClick={e => e.stopPropagation()}>
 
-            {/* Image header */}
             {popupAnn.fileData && popupAnn.fileData.startsWith('data:image') ? (
-              <div className="relative w-full" style={{ aspectRatio: '16/8' }}>
-                <img src={popupAnn.fileData} alt={popupAnn.title} className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                {/* Close on image */}
+              /* รูป: ข้อความ overlay บนรูปทั้งหมด */
+              <div className="relative" style={{ aspectRatio: '16/10' }}>
+                <img src={popupAnn.fileData} alt={popupAnn.title}
+                  className="absolute inset-0 w-full h-full object-cover" />
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.15) 100%)' }} />
                 <button onClick={closePopup}
-                  className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center text-lg transition-colors">
-                  ×
-                </button>
-                <div className="absolute bottom-3 left-4">
-                  <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${popupAnn.type === 'important' ? 'bg-red-500 text-white' : 'bg-white/90 text-brand-600'}`}>
-                    {popupAnn.type === 'important' ? '🔴 สำคัญ' : '📢 ประกาศ'}
+                  className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full text-white text-xl font-light transition-colors"
+                  style={{ background: 'rgba(0,0,0,0.4)' }}>×</button>
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <span className={`inline-block text-[11px] font-bold px-2.5 py-1 rounded-full mb-3 ${popupAnn.type === 'important' ? 'bg-red-500 text-white' : 'bg-white/20 text-white backdrop-blur-sm border border-white/30'}`}>
+                    {popupAnn.type === 'important' ? 'สำคัญ' : 'ประกาศ'}
                   </span>
+                  <h3 className="text-white font-bold leading-snug mb-1.5" style={{ fontSize: 20 }}>{popupAnn.title}</h3>
+                  <p className="text-white/80 text-sm leading-relaxed">{popupAnn.content}</p>
+                  {popupAnn.link && (
+                    <a href={popupAnn.link} target="_blank" rel="noopener noreferrer" onClick={closePopup}
+                      className="inline-block mt-4 px-5 py-2 rounded-xl bg-white text-slate-800 text-sm font-semibold hover:bg-slate-100 transition-colors">
+                      ดูรายละเอียด →
+                    </a>
+                  )}
                 </div>
               </div>
             ) : (
-              <div className={`relative px-6 pt-10 pb-6 text-center ${popupAnn.type === 'important' ? 'bg-gradient-to-br from-red-50 to-rose-100' : 'bg-gradient-to-br from-brand-50 to-indigo-100'}`}>
+              /* ไม่มีรูป */
+              <div className={`relative p-8 ${popupAnn.type === 'important' ? 'bg-gradient-to-br from-red-500 to-rose-600' : 'bg-gradient-to-br from-brand-500 to-indigo-600'}`}>
                 <button onClick={closePopup}
-                  className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/60 hover:bg-white text-slate-500 flex items-center justify-center text-lg transition-colors">
-                  ×
-                </button>
-                <div className="text-4xl mb-2">{popupAnn.type === 'important' ? '📣' : '📢'}</div>
-                <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${popupAnn.type === 'important' ? 'bg-red-100 text-red-600' : 'bg-brand-100 text-brand-600'}`}>
-                  {popupAnn.type === 'important' ? 'สำคัญ' : 'ประกาศทั่วไป'}
+                  className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full text-white text-xl font-light"
+                  style={{ background: 'rgba(255,255,255,0.2)' }}>×</button>
+                <span className="inline-block text-[11px] font-bold px-2.5 py-1 rounded-full bg-white/20 text-white border border-white/30 mb-4">
+                  {popupAnn.type === 'important' ? 'สำคัญ' : 'ประกาศ'}
                 </span>
+                <h3 className="text-white font-bold leading-snug mb-2" style={{ fontSize: 22 }}>{popupAnn.title}</h3>
+                <p className="text-white/80 text-sm leading-relaxed whitespace-pre-wrap">{popupAnn.content}</p>
+                {popupAnn.link && (
+                  <a href={popupAnn.link} target="_blank" rel="noopener noreferrer" onClick={closePopup}
+                    className="inline-block mt-5 px-5 py-2 rounded-xl bg-white text-slate-800 text-sm font-semibold hover:bg-slate-100 transition-colors">
+                    ดูรายละเอียด →
+                  </a>
+                )}
               </div>
             )}
-
-            {/* Content */}
-            <div className="px-6 py-5" style={{ overflowY: 'auto', maxHeight: 320 }}>
-              <div className="flex items-center gap-2 mb-2">
-                {!(popupAnn.fileData && popupAnn.fileData.startsWith('data:image')) && null}
-                <span className="text-[11px] text-slate-400">{new Date(popupAnn.date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-              </div>
-              <h3 className="text-xl font-bold text-slate-800 mb-2 leading-snug">{popupAnn.title}</h3>
-              <p className="text-sm text-slate-500 whitespace-pre-wrap leading-relaxed">{popupAnn.content}</p>
-            </div>
-
-            <div className="pb-2" />
           </div>
         </div>
       )}
