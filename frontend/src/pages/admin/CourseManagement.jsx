@@ -73,7 +73,12 @@ export default function CourseManagement({ showToast }) {
     setShowModal(true);
   };
 
+  const [userSearch, setUserSearch] = useState('');
   const toggleUser = (id) => setSelectedUsers(s => s.includes(id) ? s.filter(u => u !== id) : [...s, id]);
+  const toggleAll = () => {
+    const eligible = users.filter(u => u.role === 'USER');
+    setSelectedUsers(s => s.length === eligible.length ? [] : eligible.map(u => u.id));
+  };
 
   const addMaterial = () => {
     if (!matForm.title.trim()) return;
@@ -409,21 +414,62 @@ export default function CourseManagement({ showToast }) {
 
           {!editId && (
             <div>
-              <label className="block text-xs font-medium text-slate-500 mb-2">
-                Assign to Users (optional)
-              </label>
-              <div className="border border-slate-200 rounded-xl overflow-hidden max-h-40 overflow-y-auto">
-                {users.filter(u => u.role === 'USER').map(u => (
-                  <label key={u.id} className={`flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-slate-50 transition-colors ${selectedUsers.includes(u.id) ? 'bg-brand-50' : ''}`}>
-                    <input type="checkbox" checked={selectedUsers.includes(u.id)} onChange={() => toggleUser(u.id)} className="accent-brand-500" />
-                    <span className="text-sm text-slate-700 flex-1">{u.name}</span>
-                    <span className="text-xs text-slate-400">{u.dept}</span>
-                  </label>
-                ))}
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs font-medium text-slate-500">Assign to Users <span className="text-slate-300">(optional)</span></label>
+                <div className="flex items-center gap-3">
+                  {selectedUsers.length > 0 && (
+                    <span className="text-xs font-medium text-brand-500">{selectedUsers.length} selected</span>
+                  )}
+                  <button type="button" onClick={toggleAll} className="text-xs text-slate-400 hover:text-brand-500 transition-colors">
+                    {selectedUsers.length === users.filter(u => u.role === 'USER').length ? 'Deselect all' : 'Select all'}
+                  </button>
+                </div>
               </div>
+
+              {/* Search */}
+              <div className="relative mb-2">
+                <Icon name="search" size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input value={userSearch} onChange={e => setUserSearch(e.target.value)} placeholder="Search users…"
+                  className="w-full pl-8 pr-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:outline-none focus:border-brand-500" />
+              </div>
+
+              {/* Selected chips */}
               {selectedUsers.length > 0 && (
-                <p className="text-xs text-brand-500 mt-1">{selectedUsers.length} user{selectedUsers.length > 1 ? 's' : ''} selected</p>
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {selectedUsers.map(id => {
+                    const u = users.find(u => u.id === id);
+                    return u ? (
+                      <span key={id} className="flex items-center gap-1 px-2.5 py-1 bg-brand-500/10 text-brand-600 rounded-full text-xs font-medium">
+                        {u.name}
+                        <button onClick={() => toggleUser(id)} className="ml-0.5 hover:text-red-500 transition-colors">×</button>
+                      </span>
+                    ) : null;
+                  })}
+                </div>
               )}
+
+              {/* User list */}
+              <div className="border border-slate-200 rounded-xl overflow-hidden max-h-48 overflow-y-auto">
+                {users.filter(u => u.role === 'USER' && u.name.toLowerCase().includes(userSearch.toLowerCase())).length === 0 ? (
+                  <div className="px-4 py-6 text-center text-xs text-slate-400">No users found</div>
+                ) : (
+                  users.filter(u => u.role === 'USER' && u.name.toLowerCase().includes(userSearch.toLowerCase())).map(u => (
+                    <label key={u.id} onClick={() => toggleUser(u.id)}
+                      className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors border-b border-slate-50 last:border-0 ${selectedUsers.includes(u.id) ? 'bg-brand-50' : 'hover:bg-slate-50'}`}>
+                      <div className={`w-4 h-4 rounded flex items-center justify-center border transition-colors flex-shrink-0 ${selectedUsers.includes(u.id) ? 'bg-brand-500 border-brand-500' : 'border-slate-300'}`}>
+                        {selectedUsers.includes(u.id) && <Icon name="check" size={10} className="text-white" />}
+                      </div>
+                      <div className="w-7 h-7 rounded-full bg-brand-500/10 flex items-center justify-center text-[10px] font-bold text-brand-600 flex-shrink-0">
+                        {u.avatar}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm text-navy-900 font-medium truncate">{u.name}</div>
+                        <div className="text-[10px] text-slate-400 truncate">{u.dept}</div>
+                      </div>
+                    </label>
+                  ))
+                )}
+              </div>
             </div>
           )}
 
