@@ -101,4 +101,19 @@ router.post('/admin', requireAdmin, async (req, res) => {
   res.status(201).json(enrollment);
 });
 
+// Admin: get enrollments for a specific course
+router.get('/course/:courseId', requireAdmin, async (req, res) => {
+  const enrollments = await prisma.enrollment.findMany({
+    where: { courseId: req.params.courseId },
+    include: { user: { select: { id: true, name: true, avatar: true, dept: true } } }
+  });
+  res.json(enrollments);
+});
+
+// Admin: unenroll a user
+router.delete('/:id', requireAdmin, async (req, res) => {
+  await prisma.enrollment.delete({ where: { id: req.params.id } });
+  res.json({ message: 'Unenrolled' });
+});
+
 export default router;

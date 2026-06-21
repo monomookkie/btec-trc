@@ -72,14 +72,17 @@ export default function CourseManagement({ showToast }) {
     setModalTab('info');
     setShowModal(true);
   };
-  const openEdit = (c) => {
+  const openEdit = async (c) => {
     setForm({ ...c, tags: c.tags || [], materials: c.materials || [], questions: c.questions || [], quizRequired: c.quizRequired || 0 });
     setMatForm(EMPTY_MAT);
     setQForm(EMPTY_Q);
     setSelectedUsers([]);
     setEditId(c.id);
     setModalTab('info');
+    setCourseEnrollments([]);
     setShowModal(true);
+    const enrs = await api.getCourseEnrollments(c.id);
+    setCourseEnrollments(enrs);
   };
 
   const addQuestion = () => {
@@ -91,10 +94,29 @@ export default function CourseManagement({ showToast }) {
 
   const [userSearch, setUserSearch] = useState('');
   const [qForm, setQForm] = useState(EMPTY_Q);
+  const [courseEnrollments, setCourseEnrollments] = useState([]);
+
   const toggleUser = (id) => setSelectedUsers(s => s.includes(id) ? s.filter(u => u !== id) : [...s, id]);
   const toggleAll = () => {
-    const eligible = users.filter(u => u.role === 'USER');
+    const eligible = users.filter(u => u.role === 'USER' && !courseEnrollments.find(e => e.userId === u.id));
     setSelectedUsers(s => s.length === eligible.length ? [] : eligible.map(u => u.id));
+  };
+
+  const handleUnenroll = async (enrollmentId) => {
+    try {
+      await api.unenroll(enrollmentId);
+      setCourseEnrollments(es => es.filter(e => e.id !== enrollmentId));
+      showToast('Unenrolled');
+    } catch (e) { showToast(e.message, 'error'); }
+  };
+
+  const handleAddToExisting = async () => {
+    if (!selectedUsers.length || !editId) return;
+    await Promise.allSettled(selectedUsers.map(uid => api.adminEnroll(uid, editId)));
+    const updated = await api.getCourseEnrollments(editId);
+    setCourseEnrollments(updated);
+    setSelectedUsers([]);
+    showToast(`Added ${selectedUsers.length} user(s)`);
   };
 
   const addMaterial = () => {
@@ -264,13 +286,14 @@ export default function CourseManagement({ showToast }) {
       >
         {/* Modal Tabs */}
         <div className="flex gap-1.5 mb-5 border-b border-slate-100 pb-3">
-          {[['info','Course Info'],['materials','Materials'],['quiz','Post-Test'],['assign','Assign Users']].map(([k,l]) => (
-            (!editId || k !== 'assign') && (
-              <button key={k} onClick={() => setModalTab(k)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${modalTab === k ? 'bg-brand-500 text-white' : 'text-slate-500 hover:bg-slate-100'}`}>
-                {l}{k === 'quiz' && form.questions.length > 0 ? ` (${form.questions.length})` : ''}{k === 'assign' && selectedUsers.length > 0 ? ` (${selectedUsers.length})` : ''}
-              </button>
-            )
+          {[['info','Course Info'],['materials','Materials'],['quiz','Post-Test'],['assign','Users']].map(([k,l]) => (
+            <button key={k} onClick={() => setModalTab(k)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${modalTab === k ? 'bg-brand-500 text-white' : 'text-slate-500 hover:bg-slate-100'}`}>
+              {l}
+              {k === 'quiz' && form.questions.length > 0 ? ` (${form.questions.length})` : ''}
+              {k === 'assign' && !editId && selectedUsers.length > 0 ? ` (${selectedUsers.length})` : ''}
+              {k === 'assign' && editId && courseEnrollments.length > 0 ? ` (${courseEnrollments.length})` : ''}
+            </button>
           ))}
         </div>
 
@@ -444,57 +467,104 @@ export default function CourseManagement({ showToast }) {
             </div>
           )}
 
-          {/* ── Tab: Assign Users (new course only) ── */}
-          {modalTab === 'assign' && !editId && (
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-xs font-medium text-slate-500">Assign to Users <span className="text-slate-300">(optional)</span></label>
-                <div className="flex items-center gap-3">
-                  {selectedUsers.length > 0 && (
-                    <span className="text-xs font-medium text-brand-500">{selectedUsers.length} selected</span>
+          {/* ── Tab: Users ── */}
+          {modalTab === 'assign' && (
+            <div className="space-y-4">
+              {/* Edit mode: show current enrollees */}
+              {editId && (
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 mb-2">ผู้เรียนปัจจุบัน ({courseEnrollments.length} คน)</p>
+                  {courseEnrollments.length === 0 ? (
+                    <p className="text-xs text-slate-400 text-center py-4 bg-slate-50 rounded-xl">ยังไม่มีผู้เรียน</p>
+                  ) : (
+                    <div className="border border-slate-200 rounded-xl overflow-hidden max-h-44 overflow-y-auto">
+                      {courseEnrollments.map(e => (
+                        <div key={e.id} className="flex items-center gap-3 px-4 py-2.5 border-b border-slate-50 last:border-0">
+                          <div className="w-7 h-7 rounded-full bg-brand-500/10 flex items-center justify-center text-[10px] font-bold text-brand-600 flex-shrink-0">
+                            {e.user.avatar}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm text-navy-900 font-medium truncate">{e.user.name}</div>
+                            <div className="text-[10px] text-slate-400 truncate">{e.user.dept}</div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-slate-400">{e.progress}%</span>
+                            {e.completed && <Badge variant="green" className="text-[9px]">สำเร็จ</Badge>}
+                            <button onClick={() => handleUnenroll(e.id)}
+                              className="text-slate-300 hover:text-red-500 transition-colors" title="ถอนออก">
+                              <Icon name="x" size={13} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   )}
-                  <button type="button" onClick={toggleAll} className="text-xs text-slate-400 hover:text-brand-500 transition-colors">
-                    {selectedUsers.length === users.filter(u => u.role === 'USER').length ? 'Deselect all' : 'Select all'}
-                  </button>
-                </div>
-              </div>
-              <div className="relative mb-2">
-                <Icon name="search" size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input value={userSearch} onChange={e => setUserSearch(e.target.value)} placeholder="Search users…"
-                  className="w-full pl-8 pr-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:outline-none focus:border-brand-500" />
-              </div>
-              {selectedUsers.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mb-2">
-                  {selectedUsers.map(id => {
-                    const u = users.find(u => u.id === id);
-                    return u ? (
-                      <span key={id} className="flex items-center gap-1 px-2.5 py-1 bg-brand-500/10 text-brand-600 rounded-full text-xs font-medium">
-                        {u.name}
-                        <button onClick={() => toggleUser(id)} className="ml-0.5 hover:text-red-500 transition-colors">×</button>
-                      </span>
-                    ) : null;
-                  })}
                 </div>
               )}
-              <div className="border border-slate-200 rounded-xl overflow-hidden max-h-52 overflow-y-auto">
-                {users.filter(u => u.role === 'USER' && u.name.toLowerCase().includes(userSearch.toLowerCase())).length === 0 ? (
-                  <div className="px-4 py-6 text-center text-xs text-slate-400">No users found</div>
-                ) : (
-                  users.filter(u => u.role === 'USER' && u.name.toLowerCase().includes(userSearch.toLowerCase())).map(u => (
-                    <label key={u.id} onClick={() => toggleUser(u.id)}
-                      className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors border-b border-slate-50 last:border-0 ${selectedUsers.includes(u.id) ? 'bg-brand-50' : 'hover:bg-slate-50'}`}>
-                      <div className={`w-4 h-4 rounded flex items-center justify-center border transition-colors flex-shrink-0 ${selectedUsers.includes(u.id) ? 'bg-brand-500 border-brand-500' : 'border-slate-300'}`}>
-                        {selectedUsers.includes(u.id) && <Icon name="check" size={10} className="text-white" />}
-                      </div>
-                      <div className="w-7 h-7 rounded-full bg-brand-500/10 flex items-center justify-center text-[10px] font-bold text-brand-600 flex-shrink-0">
-                        {u.avatar}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm text-navy-900 font-medium truncate">{u.name}</div>
-                        <div className="text-[10px] text-slate-400 truncate">{u.dept}</div>
-                      </div>
-                    </label>
-                  ))
+
+              {/* Add new users */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-semibold text-slate-500">{editId ? 'เพิ่มผู้เรียนใหม่' : 'เลือกผู้เรียน'} <span className="font-normal text-slate-300">(optional)</span></p>
+                  <div className="flex items-center gap-3">
+                    {selectedUsers.length > 0 && <span className="text-xs font-medium text-brand-500">{selectedUsers.length} selected</span>}
+                    <button type="button" onClick={toggleAll} className="text-xs text-slate-400 hover:text-brand-500 transition-colors">
+                      {selectedUsers.length === users.filter(u => u.role === 'USER' && !courseEnrollments.find(e => e.userId === u.id)).length ? 'Deselect all' : 'Select all'}
+                    </button>
+                  </div>
+                </div>
+                <div className="relative mb-2">
+                  <Icon name="search" size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input value={userSearch} onChange={e => setUserSearch(e.target.value)} placeholder="Search users…"
+                    className="w-full pl-8 pr-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs focus:outline-none focus:border-brand-500" />
+                </div>
+                {selectedUsers.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {selectedUsers.map(id => {
+                      const u = users.find(u => u.id === id);
+                      return u ? (
+                        <span key={id} className="flex items-center gap-1 px-2.5 py-1 bg-brand-500/10 text-brand-600 rounded-full text-xs font-medium">
+                          {u.name}
+                          <button onClick={() => toggleUser(id)} className="ml-0.5 hover:text-red-500">×</button>
+                        </span>
+                      ) : null;
+                    })}
+                  </div>
+                )}
+                <div className="border border-slate-200 rounded-xl overflow-hidden max-h-44 overflow-y-auto">
+                  {users.filter(u =>
+                    u.role === 'USER' &&
+                    !courseEnrollments.find(e => e.userId === u.id) &&
+                    u.name.toLowerCase().includes(userSearch.toLowerCase())
+                  ).length === 0 ? (
+                    <div className="px-4 py-6 text-center text-xs text-slate-400">No users available</div>
+                  ) : (
+                    users.filter(u =>
+                      u.role === 'USER' &&
+                      !courseEnrollments.find(e => e.userId === u.id) &&
+                      u.name.toLowerCase().includes(userSearch.toLowerCase())
+                    ).map(u => (
+                      <label key={u.id} onClick={() => toggleUser(u.id)}
+                        className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors border-b border-slate-50 last:border-0 ${selectedUsers.includes(u.id) ? 'bg-brand-50' : 'hover:bg-slate-50'}`}>
+                        <div className={`w-4 h-4 rounded flex items-center justify-center border transition-colors flex-shrink-0 ${selectedUsers.includes(u.id) ? 'bg-brand-500 border-brand-500' : 'border-slate-300'}`}>
+                          {selectedUsers.includes(u.id) && <Icon name="check" size={10} className="text-white" />}
+                        </div>
+                        <div className="w-7 h-7 rounded-full bg-brand-500/10 flex items-center justify-center text-[10px] font-bold text-brand-600 flex-shrink-0">
+                          {u.avatar}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm text-navy-900 font-medium truncate">{u.name}</div>
+                          <div className="text-[10px] text-slate-400 truncate">{u.dept}</div>
+                        </div>
+                      </label>
+                    ))
+                  )}
+                </div>
+                {editId && selectedUsers.length > 0 && (
+                  <button onClick={handleAddToExisting}
+                    className="w-full mt-2 py-2 rounded-xl bg-brand-500 text-white text-xs font-medium hover:bg-brand-600 transition-colors">
+                    + เพิ่ม {selectedUsers.length} คน เข้า Course
+                  </button>
                 )}
               </div>
             </div>

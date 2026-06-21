@@ -28,5 +28,11 @@ app.use('/api/reports', reportRoutes);
 
 app.get('/api/health', (_, res) => res.json({ status: 'ok' }));
 
+// Global error handler — catches unhandled async errors in routes
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ error: err.message || 'Internal server error' });
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`HemoLabs LMS backend running on port ${PORT}`));
