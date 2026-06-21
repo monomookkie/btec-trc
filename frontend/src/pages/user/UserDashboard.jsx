@@ -7,9 +7,24 @@ import Badge from '../../components/ui/Badge';
 function AnnouncementCarousel({ announcements }) {
   const [current, setCurrent] = useState(0);
   const startX = useRef(null);
+  const timerRef = useRef(null);
 
-  const prev = () => setCurrent(c => Math.max(0, c - 1));
-  const next = () => setCurrent(c => Math.min(announcements.length - 1, c + 1));
+  const resetTimer = () => {
+    clearInterval(timerRef.current);
+    if (announcements.length <= 1) return;
+    timerRef.current = setInterval(() => {
+      setCurrent(c => (c + 1) % announcements.length);
+    }, 4000);
+  };
+
+  useEffect(() => {
+    resetTimer();
+    return () => clearInterval(timerRef.current);
+  }, [announcements.length]);
+
+  const goTo = (i) => { setCurrent(i); resetTimer(); };
+  const prev = () => goTo((current - 1 + announcements.length) % announcements.length);
+  const next = () => goTo((current + 1) % announcements.length);
 
   const onTouchStart = e => { startX.current = e.touches[0].clientX; };
   const onTouchEnd = e => {
@@ -20,54 +35,79 @@ function AnnouncementCarousel({ announcements }) {
     startX.current = null;
   };
 
+  const a = announcements[current];
+  const hasImage = a.fileData && a.fileData.startsWith('data:image');
+
   return (
-    <div className="max-w-2xl mx-auto mb-5">
-      <h3 className="text-sm font-semibold text-navy-900 mb-3 text-center">ประกาศ / ข่าวสาร</h3>
-      <div className="relative">
-        <div className="overflow-hidden rounded-2xl" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
-          <div className="flex transition-transform duration-300 ease-in-out"
-            style={{ transform: `translateX(-${current * 100}%)` }}>
-            {announcements.map(a => (
-              <div key={a.id} className="w-full flex-shrink-0">
-                <div className={`border overflow-hidden shadow-sm rounded-2xl ${a.type === 'important' ? 'border-red-100' : 'border-slate-100'}`}>
-                  {a.fileData && a.fileData.startsWith('data:image') && (
-                    <img src={a.fileData} alt={a.title} className="w-full max-h-64 object-cover" />
-                  )}
-                  <div className={`p-4 ${a.type === 'important' ? 'bg-red-50' : 'bg-white'}`}>
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <Badge variant={a.type === 'important' ? 'red' : 'blue'} className="text-[10px]">
-                        {a.type === 'important' ? 'สำคัญ' : 'ทั่วไป'}
-                      </Badge>
-                      <span className="text-[10px] text-slate-400">{new Date(a.date).toLocaleDateString('th-TH')}</span>
+    <div className="mb-6 -mx-4 md:-mx-7">
+      <div className="relative overflow-hidden select-none"
+        onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+
+        {/* Slides */}
+        <div className="flex transition-transform duration-500 ease-in-out"
+          style={{ transform: `translateX(-${current * 100}%)` }}>
+          {announcements.map(ann => {
+            const img = ann.fileData && ann.fileData.startsWith('data:image');
+            return (
+              <div key={ann.id} className="w-full flex-shrink-0 relative">
+                {img ? (
+                  <div className="relative" style={{ paddingBottom: '42%' }}>
+                    <img src={ann.fileData} alt={ann.title}
+                      className="absolute inset-0 w-full h-full object-cover" />
+                    {/* Gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                    {/* Text on image */}
+                    <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${ann.type === 'important' ? 'bg-red-500 text-white' : 'bg-white/20 text-white backdrop-blur-sm'}`}>
+                          {ann.type === 'important' ? 'สำคัญ' : 'ทั่วไป'}
+                        </span>
+                        <span className="text-[11px] text-white/70">{new Date(ann.date).toLocaleDateString('th-TH')}</span>
+                      </div>
+                      <p className="text-white font-semibold text-base md:text-lg leading-snug">{ann.title}</p>
+                      <p className="text-white/80 text-xs mt-1 line-clamp-2">{ann.content}</p>
                     </div>
-                    <p className="text-sm font-semibold text-slate-800 mb-1">{a.title}</p>
-                    <p className="text-xs text-slate-500 whitespace-pre-wrap">{a.content}</p>
                   </div>
-                </div>
+                ) : (
+                  <div className={`px-5 md:px-7 py-8 ${ann.type === 'important' ? 'bg-red-50' : 'bg-gradient-to-r from-brand-50 to-slate-50'}`}>
+                    <div className="max-w-2xl mx-auto">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${ann.type === 'important' ? 'bg-red-100 text-red-600' : 'bg-brand-100 text-brand-600'}`}>
+                          {ann.type === 'important' ? 'สำคัญ' : 'ทั่วไป'}
+                        </span>
+                        <span className="text-[11px] text-slate-400">{new Date(ann.date).toLocaleDateString('th-TH')}</span>
+                      </div>
+                      <p className="font-semibold text-slate-800 text-base mb-1">{ann.title}</p>
+                      <p className="text-slate-500 text-sm whitespace-pre-wrap">{ann.content}</p>
+                    </div>
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
 
-        {current > 0 && (
-          <button onClick={prev}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 w-8 h-8 rounded-full bg-white border border-slate-200 shadow text-slate-500 hover:bg-slate-50 z-10 text-lg leading-none">
-            ‹
-          </button>
-        )}
-        {current < announcements.length - 1 && (
-          <button onClick={next}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 w-8 h-8 rounded-full bg-white border border-slate-200 shadow text-slate-500 hover:bg-slate-50 z-10 text-lg leading-none">
-            ›
-          </button>
+        {/* Arrow buttons */}
+        {announcements.length > 1 && (
+          <>
+            <button onClick={prev}
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/30 hover:bg-black/50 text-white flex items-center justify-center text-lg transition-colors z-10">
+              ‹
+            </button>
+            <button onClick={next}
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/30 hover:bg-black/50 text-white flex items-center justify-center text-lg transition-colors z-10">
+              ›
+            </button>
+          </>
         )}
       </div>
 
+      {/* Dots */}
       {announcements.length > 1 && (
-        <div className="flex justify-center gap-1.5 mt-3">
+        <div className="flex justify-center gap-1.5 mt-2.5">
           {announcements.map((_, i) => (
-            <button key={i} onClick={() => setCurrent(i)}
-              className={`rounded-full transition-all duration-200 ${i === current ? 'w-4 h-2 bg-brand-500' : 'w-2 h-2 bg-slate-300'}`} />
+            <button key={i} onClick={() => goTo(i)}
+              className={`rounded-full transition-all duration-300 ${i === current ? 'w-5 h-2 bg-brand-500' : 'w-2 h-2 bg-slate-300 hover:bg-slate-400'}`} />
           ))}
         </div>
       )}
