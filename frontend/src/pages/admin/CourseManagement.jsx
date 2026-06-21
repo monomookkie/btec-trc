@@ -413,7 +413,7 @@ export default function CourseManagement({ showToast }) {
                 Assign to Users (optional)
               </label>
               <div className="border border-slate-200 rounded-xl overflow-hidden max-h-40 overflow-y-auto">
-                {users.map(u => (
+                {users.filter(u => u.role === 'USER').map(u => (
                   <label key={u.id} className={`flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-slate-50 transition-colors ${selectedUsers.includes(u.id) ? 'bg-brand-50' : ''}`}>
                     <input type="checkbox" checked={selectedUsers.includes(u.id)} onChange={() => toggleUser(u.id)} className="accent-brand-500" />
                     <span className="text-sm text-slate-700 flex-1">{u.name}</span>
