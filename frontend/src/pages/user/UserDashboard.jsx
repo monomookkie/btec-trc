@@ -1,8 +1,79 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../api';
 import Icon from '../../components/ui/Icon';
 import Badge from '../../components/ui/Badge';
+
+function AnnouncementCarousel({ announcements }) {
+  const [current, setCurrent] = useState(0);
+  const startX = useRef(null);
+
+  const prev = () => setCurrent(c => Math.max(0, c - 1));
+  const next = () => setCurrent(c => Math.min(announcements.length - 1, c + 1));
+
+  const onTouchStart = e => { startX.current = e.touches[0].clientX; };
+  const onTouchEnd = e => {
+    if (startX.current === null) return;
+    const diff = startX.current - e.changedTouches[0].clientX;
+    if (diff > 40) next();
+    else if (diff < -40) prev();
+    startX.current = null;
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto mb-5">
+      <h3 className="text-sm font-semibold text-navy-900 mb-3 text-center">ประกาศ / ข่าวสาร</h3>
+      <div className="relative">
+        <div className="overflow-hidden rounded-2xl" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+          <div className="flex transition-transform duration-300 ease-in-out"
+            style={{ transform: `translateX(-${current * 100}%)` }}>
+            {announcements.map(a => (
+              <div key={a.id} className="w-full flex-shrink-0">
+                <div className={`border overflow-hidden shadow-sm rounded-2xl ${a.type === 'important' ? 'border-red-100' : 'border-slate-100'}`}>
+                  {a.fileData && a.fileData.startsWith('data:image') && (
+                    <img src={a.fileData} alt={a.title} className="w-full max-h-64 object-cover" />
+                  )}
+                  <div className={`p-4 ${a.type === 'important' ? 'bg-red-50' : 'bg-white'}`}>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <Badge variant={a.type === 'important' ? 'red' : 'blue'} className="text-[10px]">
+                        {a.type === 'important' ? 'สำคัญ' : 'ทั่วไป'}
+                      </Badge>
+                      <span className="text-[10px] text-slate-400">{new Date(a.date).toLocaleDateString('th-TH')}</span>
+                    </div>
+                    <p className="text-sm font-semibold text-slate-800 mb-1">{a.title}</p>
+                    <p className="text-xs text-slate-500 whitespace-pre-wrap">{a.content}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {current > 0 && (
+          <button onClick={prev}
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 w-8 h-8 rounded-full bg-white border border-slate-200 shadow text-slate-500 hover:bg-slate-50 z-10 text-lg leading-none">
+            ‹
+          </button>
+        )}
+        {current < announcements.length - 1 && (
+          <button onClick={next}
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 w-8 h-8 rounded-full bg-white border border-slate-200 shadow text-slate-500 hover:bg-slate-50 z-10 text-lg leading-none">
+            ›
+          </button>
+        )}
+      </div>
+
+      {announcements.length > 1 && (
+        <div className="flex justify-center gap-1.5 mt-3">
+          {announcements.map((_, i) => (
+            <button key={i} onClick={() => setCurrent(i)}
+              className={`rounded-full transition-all duration-200 ${i === current ? 'w-4 h-2 bg-brand-500' : 'w-2 h-2 bg-slate-300'}`} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function UserDashboard({ user, showToast }) {
   const [enrollments, setEnrollments] = useState([]);
@@ -29,31 +100,7 @@ export default function UserDashboard({ user, showToast }) {
         <p className="text-slate-400 text-sm mt-1">{user.dept}</p>
       </div>
 
-            {/* Announcements — top center */}
-      {announcements.length > 0 && (
-        <div className="max-w-2xl mx-auto mb-5">
-          <h3 className="text-sm font-semibold text-navy-900 mb-3 text-center">ประกาศ / ข่าวสาร</h3>
-          <div className="space-y-4">
-            {announcements.slice(0, 5).map(a => (
-              <div key={a.id} className={`rounded-2xl border overflow-hidden shadow-sm ${a.type === 'important' ? 'border-red-100' : 'border-slate-100'}`}>
-                {a.fileData && a.fileData.startsWith('data:image') && (
-                  <img src={a.fileData} alt={a.title} className="w-full max-h-64 object-cover" />
-                )}
-                <div className={`p-4 ${a.type === 'important' ? 'bg-red-50' : 'bg-white'}`}>
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <Badge variant={a.type === 'important' ? 'red' : 'blue'} className="text-[10px]">
-                      {a.type === 'important' ? 'สำคัญ' : 'ทั่วไป'}
-                    </Badge>
-                    <span className="text-[10px] text-slate-400">{new Date(a.date).toLocaleDateString('th-TH')}</span>
-                  </div>
-                  <p className="text-sm font-semibold text-slate-800 mb-1">{a.title}</p>
-                  <p className="text-xs text-slate-500 whitespace-pre-wrap">{a.content}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {announcements.length > 0 && <AnnouncementCarousel announcements={announcements} />}
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 md:gap-4 mb-6">
@@ -97,7 +144,6 @@ export default function UserDashboard({ user, showToast }) {
           </div>
         </div>
 
-        {/* Placeholder or extra info */}
         <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex items-center justify-center">
           <p className="text-xs text-slate-300">—</p>
         </div>
