@@ -30,7 +30,9 @@ export default function BrowseCourses({ user, showToast }) {
   const [expandedMat, setExpandedMat] = useState(null);
 
   const [ytPlaying, setYtPlaying] = useState({});
+  const [ytMuted, setYtMuted] = useState({});
   const ytRefs = useRef({});
+  const ytContainerRefs = useRef({});
 
   const getYouTubeEmbedUrl = (url) => {
     try {
@@ -38,21 +40,34 @@ export default function BrowseCourses({ user, showToast }) {
       let videoId = null;
       if (u.hostname.includes('youtube.com')) videoId = u.searchParams.get('v');
       else if (u.hostname === 'youtu.be') videoId = u.pathname.slice(1);
-      if (videoId) return `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&disablekb=1&rel=0&modestbranding=1&enablejsapi=1`;
+      if (videoId) return `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&disablekb=1&rel=0&modestbranding=1&enablejsapi=1`;
     } catch (_) {}
     return null;
   };
 
-  const ytCommand = (materialId, func) => {
+  const ytCommand = (materialId, func, args) => {
     const iframe = ytRefs.current[materialId];
     if (!iframe) return;
-    iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func }), '*');
+    iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func, args: args || [] }), '*');
   };
 
   const toggleYtPlay = (materialId) => {
     const playing = ytPlaying[materialId];
     ytCommand(materialId, playing ? 'pauseVideo' : 'playVideo');
     setYtPlaying(s => ({ ...s, [materialId]: !playing }));
+  };
+
+  const toggleYtMute = (materialId) => {
+    const muted = ytMuted[materialId];
+    ytCommand(materialId, muted ? 'unMute' : 'mute');
+    setYtMuted(s => ({ ...s, [materialId]: !muted }));
+  };
+
+  const toggleYtFullscreen = (materialId) => {
+    const el = ytContainerRefs.current[materialId];
+    if (!el) return;
+    if (document.fullscreenElement) document.exitFullscreen();
+    else el.requestFullscreen();
   };
 
   const startCountdown = (materialId) => {
@@ -78,7 +93,9 @@ export default function BrowseCourses({ user, showToast }) {
     setMatCountdown({});
     setExpandedMat(null);
     setYtPlaying({});
+    setYtMuted({});
     ytRefs.current = {};
+    ytContainerRefs.current = {};
     setViewCourse(null);
   };
 
@@ -95,11 +112,19 @@ export default function BrowseCourses({ user, showToast }) {
   const getEnrollment = (courseId) => enrollments.find(e => e.courseId === courseId);
 
   const handleOpenMaterial = (m, isDone) => {
-    const embedUrl = getYouTubeEmbedUrl(m.url);
-    if (embedUrl) {
-      setExpandedMat(prev => prev === m.id ? null : m.id);
-    } else if (m.url && m.url !== '#') {
-      window.open(m.url, '_blank');
+    if (m.dataUrl) {
+      // Uploaded file — open as blob in new tab
+      fetch(m.dataUrl).then(r => r.blob()).then(blob => {
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+      });
+    } else {
+      const embedUrl = getYouTubeEmbedUrl(m.url);
+      if (embedUrl) {
+        setExpandedMat(prev => prev === m.id ? null : m.id);
+      } else if (m.url && m.url !== '#') {
+        window.open(m.url, '_blank');
+      }
     }
     if (!isDone) startCountdown(m.id);
   };
@@ -262,23 +287,40 @@ export default function BrowseCourses({ user, showToast }) {
                                 +{m.weight}%
                               </span>
                             )}
-                            {m.url && m.url !== '#' && (
+                            {(m.url && m.url !== '#' || m.dataUrl) && (
                               <button onClick={() => handleOpenMaterial(m, isDone)}
                                 className={`text-xs flex-shrink-0 transition-colors ${isDone ? 'text-emerald-600 hover:text-emerald-700' : 'text-brand-500 hover:text-brand-700'}`}>
-                                {getYouTubeEmbedUrl(m.url) ? (expandedMat === m.id ? 'ซ่อน ↑' : 'ดูวิดีโอ ▶') : 'Open →'}
+                                {m.dataUrl ? 'เปิดไฟล์ →' : getYouTubeEmbedUrl(m.url) ? (expandedMat === m.id ? 'ซ่อน ↑' : 'ดูวิดีโอ ▶') : 'Open →'}
                               </button>
                             )}
                           </div>
                           {/* YouTube embed */}
                           {expandedMat === m.id && getYouTubeEmbedUrl(m.url) && (
-                            <div className="rounded-xl overflow-hidden border border-slate-200 aspect-video w-full">
+                            <div ref={el => ytContainerRefs.current[m.id] = el}
+                              className="rounded-xl overflow-hidden border border-slate-200 aspect-video w-full relative bg-black">
+                              {/* iframe — pointer-events:none blocks all seek/click */}
                               <iframe
                                 ref={el => ytRefs.current[m.id] = el}
                                 src={getYouTubeEmbedUrl(m.url)}
-                                className="w-full h-full"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                                allowFullScreen
+                                className="w-full h-full pointer-events-none"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                               />
+                              {/* Custom control bar */}
+                              <div className="absolute bottom-0 left-0 right-0 flex items-center gap-3 px-4 py-2.5 bg-gradient-to-t from-black/70 to-transparent">
+                                <button onClick={() => toggleYtPlay(m.id)}
+                                  className="text-white hover:text-white/80 transition-colors text-base w-6 text-center">
+                                  {ytPlaying[m.id] ? '⏸' : '▶'}
+                                </button>
+                                <button onClick={() => toggleYtMute(m.id)}
+                                  className="text-white hover:text-white/80 transition-colors text-base w-6 text-center">
+                                  {ytMuted[m.id] ? '🔇' : '🔊'}
+                                </button>
+                                <div className="flex-1" />
+                                <button onClick={() => toggleYtFullscreen(m.id)}
+                                  className="text-white hover:text-white/80 transition-colors text-sm">
+                                  ⛶
+                                </button>
+                              </div>
                             </div>
                           )}
                           {/* Confirm row — shows after opening, hides when done */}

@@ -35,7 +35,7 @@ const EMPTY_COURSE = {
   questions: [],
   quizRequired: 0,
 };
-const EMPTY_MAT = { type: "pdf", title: "", url: "", weight: 0 };
+const EMPTY_MAT = { type: "pdf", title: "", url: "", dataUrl: null, inputMode: "url", weight: 0 };
 const EMPTY_Q = { question: "", choices: ["", "", "", ""], correct: 0 };
 
 export default function CourseManagement({ showToast }) {
@@ -447,9 +447,41 @@ export default function CourseManagement({ showToast }) {
                   <input value={matForm.title} onChange={e => setMatForm(m => ({ ...m, title: e.target.value }))}
                     placeholder="ชื่อ Material *" className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-xs bg-slate-50" />
                 </div>
+
+                {/* URL / Upload toggle */}
+                <div className="flex rounded-lg overflow-hidden border border-slate-200 w-fit">
+                  {['url', 'file'].map(mode => (
+                    <button key={mode} type="button"
+                      onClick={() => setMatForm(m => ({ ...m, inputMode: mode, url: '', dataUrl: null }))}
+                      className={`px-3 py-1.5 text-[11px] font-medium transition-colors ${matForm.inputMode === mode ? 'bg-brand-500 text-white' : 'bg-white text-slate-500 hover:bg-slate-50'}`}>
+                      {mode === 'url' ? 'ใส่ URL' : 'อัพโหลดไฟล์'}
+                    </button>
+                  ))}
+                </div>
+
                 <div className="flex gap-2">
-                  <input value={matForm.url} onChange={e => setMatForm(m => ({ ...m, url: e.target.value }))}
-                    placeholder="URL (optional)" className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-xs bg-slate-50" />
+                  {matForm.inputMode === 'url' ? (
+                    <input value={matForm.url} onChange={e => setMatForm(m => ({ ...m, url: e.target.value }))}
+                      placeholder="URL" className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-xs bg-slate-50" />
+                  ) : (
+                    <div className="flex-1">
+                      <label className={`flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed cursor-pointer transition-colors ${matForm.dataUrl ? 'border-emerald-400 bg-emerald-50' : 'border-slate-300 bg-slate-50 hover:bg-slate-100'}`}>
+                        <Icon name="upload" size={13} className="text-slate-400 flex-shrink-0" />
+                        <span className="text-xs text-slate-500 truncate">
+                          {matForm.fileName || 'เลือกไฟล์...'}
+                        </span>
+                        <input type="file" className="hidden"
+                          accept=".pdf,.doc,.docx,.ppt,.pptx,.mp4,.mov,.png,.jpg,.jpeg"
+                          onChange={e => {
+                            const file = e.target.files[0];
+                            if (!file) return;
+                            const reader = new FileReader();
+                            reader.onload = ev => setMatForm(m => ({ ...m, dataUrl: ev.target.result, fileName: file.name, url: '' }));
+                            reader.readAsDataURL(file);
+                          }} />
+                      </label>
+                    </div>
+                  )}
                   <div className="flex items-center gap-1.5 flex-shrink-0">
                     <input type="number" min="0" max="100" value={matForm.weight === 0 ? '' : matForm.weight}
                       onChange={e => setMatForm(m => ({ ...m, weight: e.target.value === '' ? 0 : Number(e.target.value) }))}
