@@ -29,26 +29,7 @@ export default function UserDashboard({ user, showToast }) {
         <p className="text-slate-400 text-sm mt-1">{user.dept}</p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-3 md:gap-4 mb-6">
-        {[
-          { label: 'In Progress', val: inProgress.length, icon: 'book', color: '#1A56DB', bg: '#EEF3FF' },
-          { label: 'Completed',   val: completed.length,  icon: 'check', color: '#1A7A4A', bg: '#F0FDF4' },
-          { label: 'Certificates',val: certs.length,      icon: 'cert', color: '#6D28D9', bg: '#F5F3FF' },
-        ].map(s => (
-          <div key={s.label} className="bg-white rounded-2xl border border-slate-100 p-3 md:p-5 flex flex-col sm:flex-row items-center sm:items-start gap-2 md:gap-4 shadow-sm">
-            <div className="w-9 h-9 md:w-11 md:h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: s.bg, color: s.color }}>
-              <Icon name={s.icon} size={18} />
-            </div>
-            <div className="text-center sm:text-left">
-              <div className="text-2xl md:text-3xl font-light text-navy-900">{s.val}</div>
-              <div className="text-[10px] md:text-xs text-slate-400 mt-0.5">{s.label}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Announcements — top center */}
+            {/* Announcements — top center */}
       {announcements.length > 0 && (
         <div className="max-w-2xl mx-auto mb-5">
           <h3 className="text-sm font-semibold text-navy-900 mb-3 text-center">ประกาศ / ข่าวสาร</h3>
@@ -73,6 +54,25 @@ export default function UserDashboard({ user, showToast }) {
           </div>
         </div>
       )}
+
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-3 md:gap-4 mb-6">
+        {[
+          { label: 'In Progress', val: inProgress.length, icon: 'book', color: '#1A56DB', bg: '#EEF3FF' },
+          { label: 'Completed',   val: completed.length,  icon: 'check', color: '#1A7A4A', bg: '#F0FDF4' },
+          { label: 'Certificates',val: certs.length,      icon: 'cert', color: '#6D28D9', bg: '#F5F3FF' },
+        ].map(s => (
+          <div key={s.label} className="bg-white rounded-2xl border border-slate-100 p-3 md:p-5 flex flex-col sm:flex-row items-center sm:items-start gap-2 md:gap-4 shadow-sm">
+            <div className="w-9 h-9 md:w-11 md:h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: s.bg, color: s.color }}>
+              <Icon name={s.icon} size={18} />
+            </div>
+            <div className="text-center sm:text-left">
+              <div className="text-2xl md:text-3xl font-light text-navy-900">{s.val}</div>
+              <div className="text-[10px] md:text-xs text-slate-400 mt-0.5">{s.label}</div>
+            </div>
+          </div>
+        ))}
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
         {/* My Courses */}
