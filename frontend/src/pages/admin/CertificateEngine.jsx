@@ -57,7 +57,7 @@ export default function CertificateEngine({ showToast }) {
   };
 
   const handleAddExt = async () => {
-    if (!extForm.userId || !extForm.title.trim() || !extForm.issuer.trim() || !extForm.issuedAt) return showToast('Please fill all required fields', 'error');
+    if (!extForm.title.trim() || !extForm.issuer.trim() || !extForm.issuedAt) return showToast('Please fill all required fields', 'error');
     setLoading(true);
     try {
       const cert = await api.addExternalCert({ ...extForm, fileData: extFile });
@@ -246,14 +246,6 @@ export default function CertificateEngine({ showToast }) {
       {/* Add External Cert Modal */}
       <Modal open={showAddExt} onClose={() => setShowAddExt(false)} title="Add External Certificate" size="480px">
         <div className="space-y-3">
-          <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1.5">Staff *</label>
-            <select value={extForm.userId} onChange={e => setExtForm(f => ({ ...f, userId: e.target.value }))}
-              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:border-brand-500">
-              <option value="">Select staff…</option>
-              {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
-            </select>
-          </div>
           <div>
             <label className="block text-xs font-medium text-slate-500 mb-1.5">Certificate Name *</label>
             <input value={extForm.title} onChange={e => setExtForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. OSHA Safety Training" className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none focus:border-brand-500 focus:bg-white transition-all" />

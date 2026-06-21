@@ -41,7 +41,7 @@ export default function Sidebar({ user, onLogout, onClose }) {
       {/* Nav */}
       <div className="flex-1 py-3 overflow-y-auto">
         <div className="px-4 pb-2 text-[10px] font-semibold text-white/25 uppercase tracking-wider">
-          {user.role === 'ADMIN' ? 'Administration' : 'Staff Portal'}
+          {user.role === 'ADMIN' ? 'Administration' : 'User Portal'}
         </div>
         {nav.map(n => (
           <NavLink key={n.to} to={n.to} onClick={onClose}
@@ -65,7 +65,7 @@ export default function Sidebar({ user, onLogout, onClose }) {
           <Avatar initials={user.avatar} size={32} />
           <div className="flex-1 min-w-0">
             <div className="text-white text-xs font-medium truncate">{user.name}</div>
-            <div className="text-white/30 text-[10px] capitalize">{user.role === 'ADMIN' ? 'Administrator' : 'Staff'}</div>
+            <div className="text-white/30 text-[10px] capitalize">{user.role === 'ADMIN' ? 'Administrator' : 'User'}</div>
           </div>
         </NavLink>
         <button onClick={onLogout}

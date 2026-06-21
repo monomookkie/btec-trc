@@ -32,7 +32,7 @@ export default function TopBar({ user, onMenuClick }) {
         </div>
       </div>
       <Badge variant={user.role === 'ADMIN' ? 'red' : 'blue'}>
-        {user.role === 'ADMIN' ? 'Administrator' : 'Staff'}
+        {user.role === 'ADMIN' ? 'Administrator' : 'User'}
       </Badge>
     </div>
   );

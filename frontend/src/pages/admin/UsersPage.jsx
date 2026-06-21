@@ -161,7 +161,7 @@ export default function UsersPage({ showToast }) {
           <div>
             <label className="block text-xs font-medium text-slate-500 mb-1.5">Role</label>
             <select value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))} className={inputCls}>
-              <option value="USER">Staff (User)</option>
+              <option value="USER">User</option>
               <option value="ADMIN">Administrator</option>
             </select>
           </div>

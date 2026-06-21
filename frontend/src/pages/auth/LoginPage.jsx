@@ -55,7 +55,7 @@ export default function LoginPage({ onLogin, onRegister }) {
     if (Object.keys(e).length) return;
     setLoading(true);
     try {
-      await onRegister({ name: regName.trim(), email: regEmail.trim().toLowerCase(), password: regPass, dept: regDept.trim() || 'Staff' });
+      await onRegister({ name: regName.trim(), email: regEmail.trim().toLowerCase(), password: regPass, dept: regDept.trim() || 'User' });
     } catch (e) {
       setRegErr({ email: e.message });
     } finally {
