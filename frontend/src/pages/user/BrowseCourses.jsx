@@ -94,19 +94,9 @@ export default function BrowseCourses({ user, showToast }) {
 
   const getEnrollment = (courseId) => enrollments.find(e => e.courseId === courseId);
 
-  const getInlineEmbedUrl = (m) => {
-    if (!m.url || m.url === '#') return null;
-    const ytUrl = getYouTubeEmbedUrl(m.url);
-    if (ytUrl) return { type: 'youtube', src: ytUrl };
-    if (m.type === 'pdf') return { type: 'iframe', src: m.url };
-    if (m.type === 'word' || m.type === 'ppt')
-      return { type: 'iframe', src: `https://docs.google.com/viewer?url=${encodeURIComponent(m.url)}&embedded=true` };
-    return null;
-  };
-
   const handleOpenMaterial = (m, isDone) => {
-    const embed = getInlineEmbedUrl(m);
-    if (embed) {
+    const embedUrl = getYouTubeEmbedUrl(m.url);
+    if (embedUrl) {
       setExpandedMat(prev => prev === m.id ? null : m.id);
     } else if (m.url && m.url !== '#') {
       window.open(m.url, '_blank');
@@ -272,52 +262,31 @@ export default function BrowseCourses({ user, showToast }) {
                                 +{m.weight}%
                               </span>
                             )}
-                            {m.url && m.url !== '#' && (() => {
-                              const embed = getInlineEmbedUrl(m);
-                              const label = embed
-                                ? embed.type === 'youtube'
-                                  ? (expandedMat === m.id ? 'ซ่อน ↑' : 'ดูวิดีโอ ▶')
-                                  : (expandedMat === m.id ? 'ซ่อน ↑' : 'เปิดดู →')
-                                : 'Open →';
-                              return (
-                                <button onClick={() => handleOpenMaterial(m, isDone)}
-                                  className={`text-xs flex-shrink-0 transition-colors ${isDone ? 'text-emerald-600 hover:text-emerald-700' : 'text-brand-500 hover:text-brand-700'}`}>
-                                  {label}
-                                </button>
-                              );
-                            })()}
+                            {m.url && m.url !== '#' && (
+                              <button onClick={() => handleOpenMaterial(m, isDone)}
+                                className={`text-xs flex-shrink-0 transition-colors ${isDone ? 'text-emerald-600 hover:text-emerald-700' : 'text-brand-500 hover:text-brand-700'}`}>
+                                {getYouTubeEmbedUrl(m.url) ? (expandedMat === m.id ? 'ซ่อน ↑' : 'ดูวิดีโอ ▶') : 'Open →'}
+                              </button>
+                            )}
                           </div>
-                          {/* Inline embed */}
-                          {expandedMat === m.id && (() => {
-                            const embed = getInlineEmbedUrl(m);
-                            if (!embed) return null;
-                            if (embed.type === 'youtube') return (
-                              <div className="rounded-xl overflow-hidden border border-slate-200 aspect-video w-full relative">
-                                <iframe
-                                  ref={el => ytRefs.current[m.id] = el}
-                                  src={embed.src}
-                                  className="w-full h-full pointer-events-none"
-                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                />
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/10">
-                                  <button
-                                    onClick={() => toggleYtPlay(m.id)}
-                                    className="w-14 h-14 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition-colors">
-                                    {ytPlaying[m.id] ? <span className="text-xl">⏸</span> : <span className="text-xl pl-1">▶</span>}
-                                  </button>
-                                </div>
+                          {/* YouTube embed */}
+                          {expandedMat === m.id && getYouTubeEmbedUrl(m.url) && (
+                            <div className="rounded-xl overflow-hidden border border-slate-200 aspect-video w-full relative">
+                              <iframe
+                                ref={el => ytRefs.current[m.id] = el}
+                                src={getYouTubeEmbedUrl(m.url)}
+                                className="w-full h-full pointer-events-none"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              />
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                                <button
+                                  onClick={() => toggleYtPlay(m.id)}
+                                  className="w-14 h-14 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition-colors">
+                                  {ytPlaying[m.id] ? <span className="text-xl">⏸</span> : <span className="text-xl pl-1">▶</span>}
+                                </button>
                               </div>
-                            );
-                            return (
-                              <div className="rounded-xl overflow-hidden border border-slate-200 w-full" style={{ height: '480px' }}>
-                                <iframe
-                                  src={embed.src}
-                                  className="w-full h-full"
-                                  title={m.title}
-                                />
-                              </div>
-                            );
-                          })()}
+                            </div>
+                          )}
                           {/* Confirm row — shows after opening, hides when done */}
                           {!isDone && matCountdown[m.id] !== undefined && (
                             <div className="flex items-center gap-2 pl-8">
