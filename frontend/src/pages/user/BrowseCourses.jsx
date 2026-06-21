@@ -230,10 +230,16 @@ export default function BrowseCourses({ user, showToast }) {
                 <>
                   <p className="flex-1 text-center text-sm text-slate-500 self-center">คุณได้ลงทะเบียนแล้ว</p>
                   {(viewCourse.questions || []).length > 0 && (
-                    <button onClick={() => { setQuizMode(true); setQuizAnswers({}); setQuizResult(null); }}
-                      className="flex-1 py-3 rounded-xl bg-purple-600 text-white text-sm font-medium hover:bg-purple-700">
-                      ทำ Post-Test
-                    </button>
+                    getEnrollment(viewCourse.id)?.quizPassed ? (
+                      <div className="flex-1 py-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 text-sm font-medium text-center">
+                        ✓ ผ่าน Post-Test แล้ว
+                      </div>
+                    ) : (
+                      <button onClick={() => { setQuizMode(true); setQuizAnswers({}); setQuizResult(null); }}
+                        className="flex-1 py-3 rounded-xl bg-purple-600 text-white text-sm font-medium hover:bg-purple-700">
+                        ทำ Post-Test
+                      </button>
+                    )
                   )}
                 </>
               )}

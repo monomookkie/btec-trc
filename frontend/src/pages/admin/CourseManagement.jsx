@@ -41,6 +41,7 @@ const EMPTY_Q = { question: "", choices: ["", "", "", ""], correct: 0 };
 export default function CourseManagement({ showToast }) {
   const [courses, setCourses] = useState([]);
   const [users, setUsers] = useState([]);
+  const [enrollments, setEnrollments] = useState([]);
   const [filter, setFilter] = useState("all");
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState(null);
@@ -50,7 +51,8 @@ export default function CourseManagement({ showToast }) {
   const [matForm, setMatForm] = useState(EMPTY_MAT);
   const [loading, setLoading] = useState(false);
 
-  const load = () => api.getCourses().then(setCourses);
+  const load = () => Promise.all([api.getCourses(), api.getEnrollments()])
+    .then(([c, e]) => { setCourses(c); setEnrollments(e); });
   useEffect(() => {
     load();
     api.getUsers().then(setUsers);
@@ -72,6 +74,7 @@ export default function CourseManagement({ showToast }) {
     setEditId(null);
     setModalTab('info');
     setShowModal(true);
+    api.getUsers().then(setUsers);
   };
   const openEdit = async (c) => {
     setForm({ ...c, tags: c.tags || [], materials: c.materials || [], questions: c.questions || [], quizRequired: c.quizRequired || 0 });
@@ -83,7 +86,10 @@ export default function CourseManagement({ showToast }) {
     setModalTab('info');
     setCourseEnrollments([]);
     setShowModal(true);
-    const enrs = await api.getCourseEnrollments(c.id);
+    const [enrs] = await Promise.all([
+      api.getCourseEnrollments(c.id),
+      api.getUsers().then(setUsers)
+    ]);
     setCourseEnrollments(enrs);
   };
 
@@ -258,7 +264,7 @@ export default function CourseManagement({ showToast }) {
               <p className="text-xs text-slate-400 mb-2 line-clamp-2">
                 {c.description}
               </p>
-              <div className="flex items-center gap-4 text-[11px] text-slate-400">
+              <div className="flex items-center gap-4 text-[11px] text-slate-400 mb-3">
                 <span>{c.category}</span>
                 <span>·</span>
                 <span>{c.duration} min</span>
@@ -267,6 +273,29 @@ export default function CourseManagement({ showToast }) {
                 <span>·</span>
                 <span>{(c.materials || []).length} materials</span>
               </div>
+
+              {/* Enrolled users */}
+              {(() => {
+                const courseEnrs = enrollments.filter(e => e.courseId === c.id);
+                if (courseEnrs.length === 0) return (
+                  <p className="text-[11px] text-slate-300 italic">ยังไม่มีผู้เรียน</p>
+                );
+                return (
+                  <div className="flex flex-wrap gap-2">
+                    {courseEnrs.map(e => (
+                      <div key={e.id} className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 rounded-full px-2.5 py-1">
+                        <div className="w-4 h-4 rounded-full bg-brand-500/10 flex items-center justify-center text-[9px] font-bold text-brand-600 flex-shrink-0">
+                          {e.user?.avatar}
+                        </div>
+                        <span className="text-[11px] text-slate-600 font-medium">{e.user?.name}</span>
+                        <span className={`text-[10px] font-semibold ml-0.5 ${e.completed ? 'text-emerald-500' : 'text-slate-400'}`}>
+                          {e.completed ? '✓' : `${e.progress}%`}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
             <div className="flex gap-2 flex-shrink-0">
               <button
