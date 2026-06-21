@@ -92,8 +92,10 @@ router.post('/:id/material/:materialId', requireAuth, async (req, res) => {
     progress = 0;
   }
 
-  // Auto-complete when 100%
-  const shouldComplete = progress >= 100;
+  // Auto-complete only when 100% AND (no quiz OR quiz already passed)
+  const questions = JSON.parse(enrollment.course.questions || '[]');
+  const hasQuiz = questions.length > 0;
+  const shouldComplete = progress >= 100 && (!hasQuiz || enrollment.quizPassed);
 
   const updated = await prisma.enrollment.update({
     where: { id: req.params.id },
@@ -113,6 +115,30 @@ router.post('/admin', requireAdmin, async (req, res) => {
   if (existing) return res.status(400).json({ error: 'Already enrolled' });
   const enrollment = await prisma.enrollment.create({ data: { userId, courseId }, include: { course: true, user: { select: { id: true, name: true } } } });
   res.status(201).json(enrollment);
+});
+
+// POST /api/enrollments/:id/quiz  (submit quiz result)
+router.post('/:id/quiz', requireAuth, async (req, res) => {
+  try {
+    const { correct, total, passed } = req.body;
+    const enrollment = await prisma.enrollment.findUnique({
+      where: { id: req.params.id },
+      include: { course: true }
+    });
+    if (!enrollment) return res.status(404).json({ error: 'Not found' });
+    if (enrollment.userId !== req.user.id) return res.status(403).json({ error: 'Forbidden' });
+
+    const shouldComplete = enrollment.progress >= 100 && passed;
+    const updated = await prisma.enrollment.update({
+      where: { id: req.params.id },
+      data: {
+        quizPassed: passed,
+        quizScore: Math.round((correct / total) * 100),
+        ...(shouldComplete && !enrollment.completed ? { completed: true, completedAt: new Date() } : {})
+      }
+    });
+    res.json({ quizPassed: updated.quizPassed, quizScore: updated.quizScore, completed: updated.completed });
+  } catch (e) { next(e); }
 });
 
 // Admin: get enrollments for a specific course

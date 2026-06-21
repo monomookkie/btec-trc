@@ -48,6 +48,7 @@ export const api = {
   getCourseEnrollments: (courseId) => req('GET', `/enrollments/course/${courseId}`),
   unenroll: (enrollmentId) => req('DELETE', `/enrollments/${enrollmentId}`),
   markMaterialDone: (enrollmentId, materialId) => req('POST', `/enrollments/${enrollmentId}/material/${materialId}`),
+  submitQuiz: (enrollmentId, body) => req('POST', `/enrollments/${enrollmentId}/quiz`, body),
 
   // Certificates
   getCertificates: () => req('GET', '/certificates'),

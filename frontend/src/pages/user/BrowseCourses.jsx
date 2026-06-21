@@ -68,12 +68,23 @@ export default function BrowseCourses({ user, showToast }) {
     setQuizResult(null);
   };
 
-  const submitQuiz = () => {
+  const submitQuiz = async () => {
     const qs = viewCourse.questions || [];
     let correct = 0;
     qs.forEach((q, i) => { if (Number(quizAnswers[i]) === q.correct) correct++; });
     const passed = correct >= (viewCourse.quizRequired || qs.length);
     setQuizResult({ correct, total: qs.length, passed });
+
+    const enr = getEnrollment(viewCourse.id);
+    if (enr) {
+      try {
+        const result = await api.submitQuiz(enr.id, { correct, total: qs.length, passed });
+        setEnrollments(es => es.map(e => e.id === enr.id
+          ? { ...e, quizPassed: result.quizPassed, quizScore: result.quizScore, completed: result.completed ?? e.completed }
+          : e
+        ));
+      } catch (_) {}
+    }
   };
 
   if (loading) return <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Loading…</div>;
@@ -131,6 +142,10 @@ export default function BrowseCourses({ user, showToast }) {
                   </button>
                 ) : enr.completed ? (
                   <Badge variant="green" className="flex-1 justify-center py-2">Completed</Badge>
+                ) : enr.progress >= 100 && (c.questions || []).length > 0 && !enr.quizPassed ? (
+                  <button onClick={() => openCourse(c)} className="flex-1 py-2 rounded-xl bg-purple-600 text-white text-xs font-medium hover:bg-purple-700 transition-colors">
+                    ทำ Post-Test
+                  </button>
                 ) : (
                   <Badge variant="amber" className="flex-1 justify-center py-2">In Progress</Badge>
                 )}

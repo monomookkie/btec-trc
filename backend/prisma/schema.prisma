@@ -60,6 +60,8 @@ model Enrollment {
   courseId    String
   progress           Int       @default(0)
   completedMaterials String?   @db.Text
+  quizPassed         Boolean   @default(false)
+  quizScore          Int?
   score              Int?
   completed          Boolean   @default(false)
   startedAt   DateTime  @default(now())

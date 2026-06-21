@@ -68,6 +68,7 @@ export default function CourseManagement({ showToast }) {
     setMatForm(EMPTY_MAT);
     setQForm(EMPTY_Q);
     setSelectedUsers([]);
+    setPickerChecked([]);
     setEditId(null);
     setModalTab('info');
     setShowModal(true);
@@ -77,6 +78,7 @@ export default function CourseManagement({ showToast }) {
     setMatForm(EMPTY_MAT);
     setQForm(EMPTY_Q);
     setSelectedUsers([]);
+    setPickerChecked([]);
     setEditId(c.id);
     setModalTab('info');
     setCourseEnrollments([]);
@@ -95,12 +97,24 @@ export default function CourseManagement({ showToast }) {
   const [userSearch, setUserSearch] = useState('');
   const [qForm, setQForm] = useState(EMPTY_Q);
   const [courseEnrollments, setCourseEnrollments] = useState([]);
+  const [pickerChecked, setPickerChecked] = useState([]);
 
-  const toggleUser = (id) => setSelectedUsers(s => s.includes(id) ? s.filter(u => u !== id) : [...s, id]);
-  const toggleAll = () => {
-    const eligible = users.filter(u => u.role === 'USER' && !courseEnrollments.find(e => e.userId === u.id));
-    setSelectedUsers(s => s.length === eligible.length ? [] : eligible.map(u => u.id));
+  const togglePicker = (id) => setPickerChecked(s => s.includes(id) ? s.filter(u => u !== id) : [...s, id]);
+  const togglePickerAll = () => {
+    const eligible = users.filter(u =>
+      u.role === 'USER' &&
+      !selectedUsers.includes(u.id) &&
+      !courseEnrollments.find(e => e.userId === u.id)
+    );
+    setPickerChecked(s => s.length === eligible.length ? [] : eligible.map(u => u.id));
   };
+
+  const confirmPickerToList = () => {
+    setSelectedUsers(s => [...s, ...pickerChecked.filter(id => !s.includes(id))]);
+    setPickerChecked([]);
+  };
+
+  const removeFromList = (id) => setSelectedUsers(s => s.filter(uid => uid !== id));
 
   const handleUnenroll = async (enrollmentId) => {
     try {
@@ -111,12 +125,12 @@ export default function CourseManagement({ showToast }) {
   };
 
   const handleAddToExisting = async () => {
-    if (!selectedUsers.length || !editId) return;
-    await Promise.allSettled(selectedUsers.map(uid => api.adminEnroll(uid, editId)));
+    if (!pickerChecked.length || !editId) return;
+    await Promise.allSettled(pickerChecked.map(uid => api.adminEnroll(uid, editId)));
     const updated = await api.getCourseEnrollments(editId);
     setCourseEnrollments(updated);
-    setSelectedUsers([]);
-    showToast(`Added ${selectedUsers.length} user(s)`);
+    setPickerChecked([]);
+    showToast(`Added ${pickerChecked.length} user(s)`);
   };
 
   const addMaterial = () => {
@@ -366,9 +380,19 @@ export default function CourseManagement({ showToast }) {
                   <div key={i} className="flex items-center gap-2 p-2.5 bg-slate-50 rounded-xl">
                     <MatBadge type={m.type} />
                     <span className="text-xs text-slate-700 flex-1 truncate">{m.title}</span>
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${Number(m.weight) > 0 ? 'bg-brand-100 text-brand-600' : 'bg-slate-100 text-slate-400'}`}>
-                      {m.weight || 0}%
-                    </span>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <input
+                        type="number" min="0" max="100"
+                        value={m.weight === 0 ? '' : m.weight}
+                        onChange={e => {
+                          const val = e.target.value === '' ? 0 : Number(e.target.value);
+                          setForm(f => ({ ...f, materials: f.materials.map((mat, idx) => idx === i ? { ...mat, weight: val } : mat) }));
+                        }}
+                        placeholder="0"
+                        className="w-12 px-1.5 py-1 rounded-lg border border-slate-200 bg-white text-[11px] text-center focus:outline-none focus:border-brand-500"
+                      />
+                      <span className="text-[10px] text-slate-400">%</span>
+                    </div>
                     <button onClick={() => removeMaterial(i)} className="text-slate-400 hover:text-red-500">
                       <Icon name="x" size={13} />
                     </button>
@@ -510,7 +534,7 @@ export default function CourseManagement({ showToast }) {
                                 <div className="text-sm text-navy-900 font-medium truncate">{u.name}</div>
                                 <div className="text-[10px] text-slate-400 truncate">{u.dept}</div>
                               </div>
-                              <button onClick={() => toggleUser(id)} className="text-slate-300 hover:text-red-500 transition-colors">
+                              <button onClick={() => removeFromList(id)} className="text-slate-300 hover:text-red-500 transition-colors">
                                 <Icon name="x" size={13} />
                               </button>
                             </div>
@@ -525,13 +549,11 @@ export default function CourseManagement({ showToast }) {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-xs font-semibold text-slate-500">เพิ่มผู้เรียน</p>
-                  <div className="flex items-center gap-3">
-                    {!editId && (
-                      <button type="button" onClick={toggleAll} className="text-xs text-slate-400 hover:text-brand-500 transition-colors">
-                        {selectedUsers.length === users.filter(u => u.role === 'USER').length ? 'Deselect all' : 'Select all'}
-                      </button>
-                    )}
-                  </div>
+                  <button type="button" onClick={togglePickerAll} className="text-xs text-slate-400 hover:text-brand-500 transition-colors">
+                    {pickerChecked.length > 0 && pickerChecked.length === users.filter(u =>
+                      u.role === 'USER' && !selectedUsers.includes(u.id) && !courseEnrollments.find(e => e.userId === u.id)
+                    ).length ? 'Deselect all' : 'Select all'}
+                  </button>
                 </div>
                 <div className="relative mb-2">
                   <Icon name="search" size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -553,8 +575,11 @@ export default function CourseManagement({ showToast }) {
                       !courseEnrollments.find(e => e.userId === u.id) &&
                       u.name.toLowerCase().includes(userSearch.toLowerCase())
                     ).map(u => (
-                      <button key={u.id} onClick={() => toggleUser(u.id)}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-brand-50 transition-colors border-b border-slate-50 last:border-0 text-left">
+                      <label key={u.id} onClick={() => togglePicker(u.id)}
+                        className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors border-b border-slate-50 last:border-0 ${pickerChecked.includes(u.id) ? 'bg-brand-50' : 'hover:bg-slate-50'}`}>
+                        <div className={`w-4 h-4 rounded flex items-center justify-center border transition-colors flex-shrink-0 ${pickerChecked.includes(u.id) ? 'bg-brand-500 border-brand-500' : 'border-slate-300'}`}>
+                          {pickerChecked.includes(u.id) && <Icon name="check" size={10} className="text-white" />}
+                        </div>
                         <div className="w-7 h-7 rounded-full bg-brand-500/10 flex items-center justify-center text-[10px] font-bold text-brand-600 flex-shrink-0">
                           {u.avatar}
                         </div>
@@ -562,15 +587,14 @@ export default function CourseManagement({ showToast }) {
                           <div className="text-sm text-navy-900 font-medium truncate">{u.name}</div>
                           <div className="text-[10px] text-slate-400 truncate">{u.dept}</div>
                         </div>
-                        <span className="text-brand-500 text-xs flex-shrink-0">+ เพิ่ม</span>
-                      </button>
+                      </label>
                     ))
                   )}
                 </div>
-                {editId && selectedUsers.length > 0 && (
-                  <button onClick={handleAddToExisting}
+                {pickerChecked.length > 0 && (
+                  <button onClick={editId ? handleAddToExisting : confirmPickerToList}
                     className="w-full mt-2 py-2 rounded-xl bg-brand-500 text-white text-xs font-medium hover:bg-brand-600 transition-colors">
-                    + เพิ่ม {selectedUsers.length} คน เข้า Course
+                    + เพิ่ม {pickerChecked.length} คน {editId ? 'เข้า Course' : 'เข้ารายการ'}
                   </button>
                 )}
               </div>
