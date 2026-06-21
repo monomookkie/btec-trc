@@ -74,22 +74,36 @@ router.post('/:id/material/:materialId', requireAuth, async (req, res) => {
   const completed = JSON.parse(enrollment.completedMaterials || '[]');
   if (!completed.includes(req.params.materialId)) completed.push(req.params.materialId);
 
-  // Recalculate progress from weights
+  // Recalculate progress
   const materials = enrollment.course.materials;
-  const totalWeight = materials.reduce((s, m) => s + (m.weight || 0), 0);
-  let progress = enrollment.progress;
+  let progress;
+  const totalWeight = materials.reduce((s, m) => s + (Number(m.weight) || 0), 0);
   if (totalWeight > 0) {
+    // Use weight-based calculation
     const doneWeight = materials
       .filter(m => completed.includes(m.id))
-      .reduce((s, m) => s + (m.weight || 0), 0);
+      .reduce((s, m) => s + (Number(m.weight) || 0), 0);
     progress = Math.min(100, Math.round((doneWeight / totalWeight) * 100));
+  } else if (materials.length > 0) {
+    // Fallback: count-based (each material worth equal share)
+    const doneCount = materials.filter(m => completed.includes(m.id)).length;
+    progress = Math.round((doneCount / materials.length) * 100);
+  } else {
+    progress = 0;
   }
+
+  // Auto-complete when 100%
+  const shouldComplete = progress >= 100;
 
   const updated = await prisma.enrollment.update({
     where: { id: req.params.id },
-    data: { completedMaterials: JSON.stringify(completed), progress }
+    data: {
+      completedMaterials: JSON.stringify(completed),
+      progress,
+      ...(shouldComplete && !enrollment.completed ? { completed: true, completedAt: new Date() } : {})
+    }
   });
-  res.json({ completedMaterials: completed, progress: updated.progress });
+  res.json({ completedMaterials: completed, progress: updated.progress, completed: updated.completed });
 });
 
 // Admin: enroll a user into a course

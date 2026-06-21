@@ -42,7 +42,7 @@ export default function BrowseCourses({ user, showToast }) {
     try {
       const result = await api.markMaterialDone(enr.id, m.id);
       setEnrollments(es => es.map(e => e.id === enr.id
-        ? { ...e, completedMaterials: JSON.stringify(result.completedMaterials), progress: result.progress }
+        ? { ...e, completedMaterials: JSON.stringify(result.completedMaterials), progress: result.progress, completed: result.completed ?? e.completed }
         : e
       ));
     } catch (_) {}
