@@ -11,19 +11,25 @@ export default function CertificateEngine({ showToast }) {
   const [enrollments, setEnrollments] = useState([]);
   const [templates, setTemplates] = useState([]);
   const [externalCerts, setExternalCerts] = useState([]);
+  const [users, setUsers] = useState([]);
   const [tab, setTab] = useState('certs');
   const [confirmDel, setConfirmDel] = useState(null);
   const [showIssue, setShowIssue] = useState(false);
+  const [showAddExt, setShowAddExt] = useState(false);
+  const [extForm, setExtForm] = useState({ userId: '', title: '', issuer: '', issuedAt: '', expiresAt: '' });
+  const [extFile, setExtFile] = useState(null);
+  const [extFileName, setExtFileName] = useState('');
   const [issueEnrId, setIssueEnrId] = useState('');
   const [issueScore, setIssueScore] = useState('');
   const [loading, setLoading] = useState(false);
 
   const load = async () => {
-    const [c, e, t, ex] = await Promise.all([api.getCertificates(), api.getEnrollments(), api.getCertTemplates(), api.getAllExternalCerts()]);
+    const [c, e, t, ex, u] = await Promise.all([api.getCertificates(), api.getEnrollments(), api.getCertTemplates(), api.getAllExternalCerts(), api.getUsers()]);
     setCerts(c);
     setEnrollments(e.filter(e => e.completed && !e.certificate));
     setTemplates(t);
     setExternalCerts(ex);
+    setUsers(u);
   };
 
   useEffect(() => { load(); }, []);
@@ -36,6 +42,30 @@ export default function CertificateEngine({ showToast }) {
       showToast('Certificate issued');
       setShowIssue(false); setIssueEnrId(''); setIssueScore('');
       load();
+    } catch (e) { showToast(e.message, 'error'); }
+    finally { setLoading(false); }
+  };
+
+  const handleExtFile = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) return showToast('File must be under 5MB', 'error');
+    setExtFileName(file.name);
+    const reader = new FileReader();
+    reader.onload = () => setExtFile(reader.result);
+    reader.readAsDataURL(file);
+  };
+
+  const handleAddExt = async () => {
+    if (!extForm.userId || !extForm.title.trim() || !extForm.issuer.trim() || !extForm.issuedAt) return showToast('Please fill all required fields', 'error');
+    setLoading(true);
+    try {
+      const cert = await api.addExternalCert({ ...extForm, fileData: extFile });
+      setExternalCerts(ex => [{ ...cert, user: users.find(u => u.id === extForm.userId) }, ...ex]);
+      setShowAddExt(false);
+      setExtForm({ userId: '', title: '', issuer: '', issuedAt: '', expiresAt: '' });
+      setExtFile(null); setExtFileName('');
+      showToast('Certificate added');
     } catch (e) { showToast(e.message, 'error'); }
     finally { setLoading(false); }
   };
@@ -110,6 +140,11 @@ export default function CertificateEngine({ showToast }) {
 
       {tab === 'external' && (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <div className="px-5 py-3 border-b border-slate-100 flex justify-end">
+            <button onClick={() => setShowAddExt(true)} className="flex items-center gap-2 px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-sm font-medium transition-colors">
+              <Icon name="plus" size={14} /> Add External Cert
+            </button>
+          </div>
           <table className="w-full">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50">
@@ -205,6 +240,50 @@ export default function CertificateEngine({ showToast }) {
               {loading ? 'Issuing…' : 'Issue Certificate'}
             </button>
           </div>
+        </div>
+      </Modal>
+
+      {/* Add External Cert Modal */}
+      <Modal open={showAddExt} onClose={() => setShowAddExt(false)} title="Add External Certificate" size="480px">
+        <div className="space-y-3">
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-1.5">Staff *</label>
+            <select value={extForm.userId} onChange={e => setExtForm(f => ({ ...f, userId: e.target.value }))}
+              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:border-brand-500">
+              <option value="">Select staff…</option>
+              {users.filter(u => u.role !== 'ADMIN').map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-1.5">Certificate Name *</label>
+            <input value={extForm.title} onChange={e => setExtForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. OSHA Safety Training" className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none focus:border-brand-500 focus:bg-white transition-all" />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-1.5">Issued By *</label>
+            <input value={extForm.issuer} onChange={e => setExtForm(f => ({ ...f, issuer: e.target.value }))} placeholder="e.g. Ministry of Public Health" className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none focus:border-brand-500 focus:bg-white transition-all" />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-1.5">Issue Date *</label>
+            <input type="date" value={extForm.issuedAt} onChange={e => setExtForm(f => ({ ...f, issuedAt: e.target.value }))} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none focus:border-brand-500 focus:bg-white transition-all" />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-1.5">Expiry Date (optional)</label>
+            <input type="date" value={extForm.expiresAt} onChange={e => setExtForm(f => ({ ...f, expiresAt: e.target.value }))} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none focus:border-brand-500 focus:bg-white transition-all" />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-1.5">File (optional — PDF, JPG, PNG, Word, Excel, max 5MB)</label>
+            <label className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-dashed border-slate-300 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors">
+              <Icon name="plus" size={14} className="text-slate-400 flex-shrink-0" />
+              <span className="text-sm text-slate-500 truncate">{extFileName || 'Choose file…'}</span>
+              <input type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" onChange={handleExtFile} className="hidden" />
+            </label>
+          </div>
+        </div>
+        <div className="flex gap-2 mt-5">
+          <button onClick={() => setShowAddExt(false)} className="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-600 hover:bg-slate-50">Cancel</button>
+          <button onClick={handleAddExt} disabled={loading} className="flex-1 py-2.5 rounded-xl bg-brand-500 text-white text-sm font-medium hover:bg-brand-600 disabled:opacity-60">
+            {loading ? 'Saving…' : 'Add Certificate'}
+          </button>
         </div>
       </Modal>
 

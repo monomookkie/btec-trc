@@ -84,10 +84,11 @@ router.get('/external/all', requireAdmin, async (req, res) => {
 
 // POST /api/certificates/external
 router.post('/external', requireAuth, async (req, res) => {
-  const { title, issuer, issuedAt, expiresAt, fileData } = req.body;
+  const { title, issuer, issuedAt, expiresAt, fileData, userId } = req.body;
   if (!title?.trim() || !issuer?.trim() || !issuedAt) return res.status(400).json({ error: 'Title, issuer and issue date are required' });
+  const targetUserId = (req.user.role === 'ADMIN' && userId) ? userId : req.user.id;
   const cert = await prisma.externalCert.create({
-    data: { userId: req.user.id, title: title.trim(), issuer: issuer.trim(), issuedAt: new Date(issuedAt), expiresAt: expiresAt ? new Date(expiresAt) : null, fileData: fileData || null }
+    data: { userId: targetUserId, title: title.trim(), issuer: issuer.trim(), issuedAt: new Date(issuedAt), expiresAt: expiresAt ? new Date(expiresAt) : null, fileData: fileData || null }
   });
   res.status(201).json(cert);
 });
