@@ -163,42 +163,42 @@ export default function UserDashboard({ user, showToast }) {
             onClick={e => e.stopPropagation()}>
 
             {popupAnn.fileData && popupAnn.fileData.startsWith('data:image') ? (
-              /* รูป: ข้อความ overlay บนรูปทั้งหมด */
-              <div className="relative" style={{ aspectRatio: '16/10' }}>
+              <div className="relative w-full aspect-[8/5] overflow-hidden">
                 <img src={popupAnn.fileData} alt={popupAnn.title}
                   className="absolute inset-0 w-full h-full object-cover" />
-                <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.15) 100%)' }} />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10" />
                 <button onClick={closePopup}
-                  className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full text-white text-xl font-light transition-colors"
-                  style={{ background: 'rgba(0,0,0,0.4)' }}>×</button>
+                  className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white text-xl flex items-center justify-center transition-colors border-0">
+                  ×
+                </button>
                 <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <span className={`inline-block text-[11px] font-bold px-2.5 py-1 rounded-full mb-3 ${popupAnn.type === 'important' ? 'bg-red-500 text-white' : 'bg-white/20 text-white backdrop-blur-sm border border-white/30'}`}>
+                  <span className={`inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full mb-2.5 border border-white/30 ${popupAnn.type === 'important' ? 'bg-red-500 text-white' : 'bg-white/20 text-white'}`}>
                     {popupAnn.type === 'important' ? 'สำคัญ' : 'ประกาศ'}
                   </span>
-                  <h3 className="text-white font-bold leading-snug mb-1.5" style={{ fontSize: 20 }}>{popupAnn.title}</h3>
+                  <p className="text-white font-bold text-lg leading-snug mb-1.5">{popupAnn.title}</p>
                   <p className="text-white/80 text-sm leading-relaxed">{popupAnn.content}</p>
                   {popupAnn.link && (
                     <a href={popupAnn.link} target="_blank" rel="noopener noreferrer" onClick={closePopup}
-                      className="inline-block mt-4 px-5 py-2 rounded-xl bg-white text-slate-800 text-sm font-semibold hover:bg-slate-100 transition-colors">
+                      className="inline-block mt-3 px-5 py-2 rounded-xl bg-white text-slate-800 text-sm font-semibold hover:bg-slate-100 transition-colors no-underline">
                       ดูรายละเอียด →
                     </a>
                   )}
                 </div>
               </div>
             ) : (
-              /* ไม่มีรูป */
               <div className={`relative p-8 ${popupAnn.type === 'important' ? 'bg-gradient-to-br from-red-500 to-rose-600' : 'bg-gradient-to-br from-brand-500 to-indigo-600'}`}>
                 <button onClick={closePopup}
-                  className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full text-white text-xl font-light"
-                  style={{ background: 'rgba(255,255,255,0.2)' }}>×</button>
-                <span className="inline-block text-[11px] font-bold px-2.5 py-1 rounded-full bg-white/20 text-white border border-white/30 mb-4">
+                  className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white text-xl flex items-center justify-center transition-colors border-0">
+                  ×
+                </button>
+                <span className="inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-white/20 text-white border border-white/30 mb-4">
                   {popupAnn.type === 'important' ? 'สำคัญ' : 'ประกาศ'}
                 </span>
-                <h3 className="text-white font-bold leading-snug mb-2" style={{ fontSize: 22 }}>{popupAnn.title}</h3>
+                <p className="text-white font-bold text-xl leading-snug mb-2">{popupAnn.title}</p>
                 <p className="text-white/80 text-sm leading-relaxed whitespace-pre-wrap">{popupAnn.content}</p>
                 {popupAnn.link && (
                   <a href={popupAnn.link} target="_blank" rel="noopener noreferrer" onClick={closePopup}
-                    className="inline-block mt-5 px-5 py-2 rounded-xl bg-white text-slate-800 text-sm font-semibold hover:bg-slate-100 transition-colors">
+                    className="inline-block mt-5 px-5 py-2 rounded-xl bg-white text-slate-800 text-sm font-semibold hover:bg-slate-100 transition-colors no-underline">
                     ดูรายละเอียด →
                   </a>
                 )}
