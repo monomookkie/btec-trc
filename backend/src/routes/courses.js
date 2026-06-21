@@ -11,7 +11,7 @@ router.get('/', requireAuth, async (req, res) => {
     include: { materials: true, _count: { select: { enrollments: true } } },
     orderBy: { createdAt: 'desc' }
   });
-  res.json(courses.map(c => ({ ...c, tags: JSON.parse(c.tags || '[]') })));
+  res.json(courses.map(c => ({ ...c, tags: JSON.parse(c.tags || '[]'), questions: JSON.parse(c.questions || '[]') })));
 });
 
 // GET /api/courses/:id
@@ -21,28 +21,30 @@ router.get('/:id', requireAuth, async (req, res) => {
     include: { materials: true }
   });
   if (!course) return res.status(404).json({ error: 'Course not found' });
-  res.json({ ...course, tags: JSON.parse(course.tags || '[]') });
+  res.json({ ...course, tags: JSON.parse(course.tags || '[]'), questions: JSON.parse(course.questions || '[]') });
 });
 
 // POST /api/courses
 router.post('/', requireAdmin, async (req, res) => {
-  const { title, category, description, status, duration, passScore, tags, materials } = req.body;
+  const { title, category, description, status, duration, passScore, tags, materials, questions, quizRequired } = req.body;
   const course = await prisma.course.create({
     data: {
       title, category, description,
       status: status?.toUpperCase() || 'DRAFT',
       duration: Number(duration), passScore: Number(passScore) || 80,
       tags: JSON.stringify(tags || []),
+      questions: JSON.stringify(questions || []),
+      quizRequired: Number(quizRequired) || 0,
       materials: { create: (materials || []).map(({ type, title, url }) => ({ type, title, url: url || null })) }
     },
     include: { materials: true }
   });
-  res.status(201).json({ ...course, tags: JSON.parse(course.tags) });
+  res.status(201).json({ ...course, tags: JSON.parse(course.tags), questions: JSON.parse(course.questions) });
 });
 
 // PUT /api/courses/:id
 router.put('/:id', requireAdmin, async (req, res) => {
-  const { title, category, description, status, duration, passScore, tags, materials } = req.body;
+  const { title, category, description, status, duration, passScore, tags, materials, questions, quizRequired } = req.body;
   await prisma.material.deleteMany({ where: { courseId: req.params.id } });
   const course = await prisma.course.update({
     where: { id: req.params.id },
@@ -51,11 +53,13 @@ router.put('/:id', requireAdmin, async (req, res) => {
       status: status?.toUpperCase(),
       duration: Number(duration), passScore: Number(passScore),
       tags: JSON.stringify(tags || []),
+      questions: JSON.stringify(questions || []),
+      quizRequired: Number(quizRequired) || 0,
       materials: { create: (materials || []).map(({ type, title, url, dataUrl }) => ({ type, title, url: url || null, dataUrl: dataUrl || null })) }
     },
     include: { materials: true }
   });
-  res.json({ ...course, tags: JSON.parse(course.tags) });
+  res.json({ ...course, tags: JSON.parse(course.tags), questions: JSON.parse(course.questions) });
 });
 
 // DELETE /api/courses/:id

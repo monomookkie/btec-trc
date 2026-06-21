@@ -30,8 +30,10 @@ model Course {
   description String     @db.Text
   status      CourseStatus @default(DRAFT)
   duration    Int
-  passScore   Int        @default(80)
-  tags        String     @db.Text
+  passScore     Int        @default(80)
+  tags          String     @db.Text
+  questions     String?    @db.LongText
+  quizRequired  Int        @default(0)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 

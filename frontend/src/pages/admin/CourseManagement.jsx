@@ -32,8 +32,11 @@ const EMPTY_COURSE = {
   passScore: 80,
   tags: [],
   materials: [],
+  questions: [],
+  quizRequired: 0,
 };
 const EMPTY_MAT = { type: "pdf", title: "", url: "" };
+const EMPTY_Q = { question: "", choices: ["", "", "", ""], correct: 0 };
 
 export default function CourseManagement({ showToast }) {
   const [courses, setCourses] = useState([]);
@@ -61,19 +64,29 @@ export default function CourseManagement({ showToast }) {
   const openNew = () => {
     setForm(EMPTY_COURSE);
     setMatForm(EMPTY_MAT);
+    setQForm(EMPTY_Q);
     setSelectedUsers([]);
     setEditId(null);
     setShowModal(true);
   };
   const openEdit = (c) => {
-    setForm({ ...c, tags: c.tags || [], materials: c.materials || [] });
+    setForm({ ...c, tags: c.tags || [], materials: c.materials || [], questions: c.questions || [], quizRequired: c.quizRequired || 0 });
     setMatForm(EMPTY_MAT);
+    setQForm(EMPTY_Q);
     setSelectedUsers([]);
     setEditId(c.id);
     setShowModal(true);
   };
 
+  const addQuestion = () => {
+    if (!qForm.question.trim() || qForm.choices.some(c => !c.trim())) return;
+    setForm(f => ({ ...f, questions: [...f.questions, { ...qForm, id: Date.now().toString() }] }));
+    setQForm(EMPTY_Q);
+  };
+  const removeQuestion = (idx) => setForm(f => ({ ...f, questions: f.questions.filter((_, i) => i !== idx) }));
+
   const [userSearch, setUserSearch] = useState('');
+  const [qForm, setQForm] = useState(EMPTY_Q);
   const toggleUser = (id) => setSelectedUsers(s => s.includes(id) ? s.filter(u => u !== id) : [...s, id]);
   const toggleAll = () => {
     const eligible = users.filter(u => u.role === 'USER');
@@ -409,6 +422,69 @@ export default function CourseManagement({ showToast }) {
               >
                 <Icon name="plus" size={13} />
               </button>
+            </div>
+          </div>
+
+          {/* Post-Test */}
+          <div className="border border-slate-200 rounded-2xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <label className="text-xs font-semibold text-slate-600">Post-Test Quiz</label>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-slate-400">ต้องตอบถูก</span>
+                <input type="number" min="0" max={form.questions.length} value={form.quizRequired}
+                  onChange={e => setForm(f => ({ ...f, quizRequired: Number(e.target.value) }))}
+                  className="w-14 px-2 py-1 rounded-lg border border-slate-200 bg-slate-50 text-xs text-center focus:outline-none focus:border-brand-500" />
+                <span className="text-xs text-slate-400">/ {form.questions.length} ข้อ ถึงจะผ่าน</span>
+              </div>
+            </div>
+
+            {/* Questions list */}
+            {form.questions.length > 0 && (
+              <div className="space-y-2 mb-3">
+                {form.questions.map((q, i) => (
+                  <div key={q.id} className="bg-slate-50 rounded-xl p-3">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <span className="text-xs font-medium text-navy-900">{i + 1}. {q.question}</span>
+                      <button onClick={() => removeQuestion(i)} className="text-slate-300 hover:text-red-400 flex-shrink-0">
+                        <Icon name="x" size={13} />
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-1">
+                      {q.choices.map((c, ci) => (
+                        <span key={ci} className={`text-[11px] px-2 py-1 rounded-lg ${ci === q.correct ? 'bg-emerald-100 text-emerald-700 font-medium' : 'text-slate-500'}`}>
+                          {ci === q.correct ? '✓ ' : ''}{c}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Add question form */}
+            <div className="bg-slate-50 rounded-xl p-3 space-y-2">
+              <input value={qForm.question} onChange={e => setQForm(q => ({ ...q, question: e.target.value }))}
+                placeholder="คำถาม *"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-xs focus:outline-none focus:border-brand-500" />
+              <div className="grid grid-cols-2 gap-2">
+                {qForm.choices.map((c, i) => (
+                  <div key={i} className="flex items-center gap-1.5">
+                    <input type="radio" name="correct" checked={qForm.correct === i}
+                      onChange={() => setQForm(q => ({ ...q, correct: i }))} className="accent-emerald-500 flex-shrink-0" title="เฉลย" />
+                    <input value={c} onChange={e => {
+                      const choices = [...qForm.choices]; choices[i] = e.target.value;
+                      setQForm(q => ({ ...q, choices }));
+                    }} placeholder={`ตัวเลือก ${i + 1} *`}
+                      className="flex-1 px-2 py-1.5 rounded-lg border border-slate-200 bg-white text-xs focus:outline-none focus:border-brand-500" />
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-slate-400">กดปุ่ม ● หน้าตัวเลือกเพื่อเลือกเฉลย</span>
+                <button onClick={addQuestion} className="px-3 py-1.5 bg-brand-500 text-white rounded-lg text-xs hover:bg-brand-600 transition-colors">
+                  + เพิ่มคำถาม
+                </button>
+              </div>
             </div>
           </div>
 
