@@ -38,7 +38,7 @@ export default function BrowseCourses({ user, showToast }) {
       let videoId = null;
       if (u.hostname.includes('youtube.com')) videoId = u.searchParams.get('v');
       else if (u.hostname === 'youtu.be') videoId = u.pathname.slice(1);
-      if (videoId) return `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&disablekb=1&rel=0&modestbranding=1&enablejsapi=1`;
+      if (videoId) return `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&disablekb=1&rel=0&modestbranding=1&enablejsapi=1`;
     } catch (_) {}
     return null;
   };
@@ -271,20 +271,14 @@ export default function BrowseCourses({ user, showToast }) {
                           </div>
                           {/* YouTube embed */}
                           {expandedMat === m.id && getYouTubeEmbedUrl(m.url) && (
-                            <div className="rounded-xl overflow-hidden border border-slate-200 aspect-video w-full relative">
+                            <div className="rounded-xl overflow-hidden border border-slate-200 aspect-video w-full">
                               <iframe
                                 ref={el => ytRefs.current[m.id] = el}
                                 src={getYouTubeEmbedUrl(m.url)}
-                                className="w-full h-full pointer-events-none"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                className="w-full h-full"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                                allowFullScreen
                               />
-                              <div className="absolute inset-0 flex items-center justify-center bg-black/10">
-                                <button
-                                  onClick={() => toggleYtPlay(m.id)}
-                                  className="w-14 h-14 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition-colors">
-                                  {ytPlaying[m.id] ? <span className="text-xl">⏸</span> : <span className="text-xl pl-1">▶</span>}
-                                </button>
-                              </div>
                             </div>
                           )}
                           {/* Confirm row — shows after opening, hides when done */}
