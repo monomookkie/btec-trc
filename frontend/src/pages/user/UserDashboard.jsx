@@ -156,43 +156,69 @@ export default function UserDashboard({ user, showToast }) {
 
       {/* Announcement Popup */}
       {popupAnn && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.5)' }}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in">
-            {/* Image */}
-            {popupAnn.fileData && popupAnn.fileData.startsWith('data:image') && (
-              <div className="relative w-full" style={{ aspectRatio: '16/7' }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6"
+          style={{ background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(4px)' }}
+          onClick={closePopup}>
+          <div className="bg-white rounded-3xl shadow-2xl w-full overflow-hidden"
+            style={{ maxWidth: 480, maxHeight: '90vh' }}
+            onClick={e => e.stopPropagation()}>
+
+            {/* Image header */}
+            {popupAnn.fileData && popupAnn.fileData.startsWith('data:image') ? (
+              <div className="relative w-full" style={{ aspectRatio: '16/8' }}>
                 <img src={popupAnn.fileData} alt={popupAnn.title} className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                {/* Close on image */}
+                <button onClick={closePopup}
+                  className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center text-lg transition-colors">
+                  ×
+                </button>
+                <div className="absolute bottom-3 left-4">
+                  <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${popupAnn.type === 'important' ? 'bg-red-500 text-white' : 'bg-white/90 text-brand-600'}`}>
+                    {popupAnn.type === 'important' ? '🔴 สำคัญ' : '📢 ประกาศ'}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className={`relative px-6 pt-10 pb-6 text-center ${popupAnn.type === 'important' ? 'bg-gradient-to-br from-red-50 to-rose-100' : 'bg-gradient-to-br from-brand-50 to-indigo-100'}`}>
+                <button onClick={closePopup}
+                  className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/60 hover:bg-white text-slate-500 flex items-center justify-center text-lg transition-colors">
+                  ×
+                </button>
+                <div className="text-4xl mb-2">{popupAnn.type === 'important' ? '📣' : '📢'}</div>
+                <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${popupAnn.type === 'important' ? 'bg-red-100 text-red-600' : 'bg-brand-100 text-brand-600'}`}>
+                  {popupAnn.type === 'important' ? 'สำคัญ' : 'ประกาศทั่วไป'}
+                </span>
               </div>
             )}
 
             {/* Content */}
-            <div className="p-6">
-              <div className="flex items-start justify-between gap-3 mb-3">
-                <div className="flex items-center gap-2">
-                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${popupAnn.type === 'important' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}`}>
-                    {popupAnn.type === 'important' ? 'สำคัญ' : 'ทั่วไป'}
-                  </span>
-                  <span className="text-[11px] text-slate-400">{new Date(popupAnn.date).toLocaleDateString('th-TH')}</span>
-                </div>
-                <button onClick={closePopup}
-                  className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center text-base flex-shrink-0 transition-colors">
-                  ×
-                </button>
+            <div className="px-6 py-5" style={{ overflowY: 'auto', maxHeight: 320 }}>
+              <div className="flex items-center gap-2 mb-2">
+                {!(popupAnn.fileData && popupAnn.fileData.startsWith('data:image')) && null}
+                <span className="text-[11px] text-slate-400">{new Date(popupAnn.date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
               </div>
-
-              <h3 className="text-lg font-semibold text-slate-800 mb-2">{popupAnn.title}</h3>
+              <h3 className="text-xl font-bold text-slate-800 mb-2 leading-snug">{popupAnn.title}</h3>
               <p className="text-sm text-slate-500 whitespace-pre-wrap leading-relaxed">{popupAnn.content}</p>
+            </div>
 
-              {popupAnn.link && (
-                <a href={popupAnn.link} target="_blank" rel="noopener noreferrer"
-                  onClick={closePopup}
-                  className="mt-4 w-full block text-center py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium transition-colors">
-                  ดูรายละเอียดเพิ่มเติม →
-                </a>
-              )}
-              {!popupAnn.link && (
+            {/* Footer */}
+            <div className="px-6 pb-6 flex gap-3">
+              {popupAnn.link ? (
+                <>
+                  <button onClick={closePopup}
+                    className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-500 text-sm font-medium hover:bg-slate-50 transition-colors">
+                    ปิด
+                  </button>
+                  <a href={popupAnn.link} target="_blank" rel="noopener noreferrer"
+                    onClick={closePopup}
+                    className="flex-1 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold text-center transition-colors">
+                    ดูรายละเอียด →
+                  </a>
+                </>
+              ) : (
                 <button onClick={closePopup}
-                  className="mt-4 w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-medium transition-colors">
+                  className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold transition-colors">
                   รับทราบ
                 </button>
               )}
