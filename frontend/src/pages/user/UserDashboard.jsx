@@ -14,7 +14,7 @@ function AnnouncementCarousel({ announcements }) {
     if (announcements.length <= 1) return;
     timerRef.current = setInterval(() => {
       setCurrent(c => (c + 1) % announcements.length);
-    }, 4000);
+    },10000);
   };
 
   useEffect(() => {
