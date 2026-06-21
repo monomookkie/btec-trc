@@ -35,7 +35,7 @@ router.post('/', requireAdmin, async (req, res) => {
       tags: JSON.stringify(tags || []),
       questions: JSON.stringify(questions || []),
       quizRequired: Number(quizRequired) || 0,
-      materials: { create: (materials || []).map(({ type, title, url }) => ({ type, title, url: url || null })) }
+      materials: { create: (materials || []).map(({ type, title, url, weight }) => ({ type, title, url: url || null, weight: Number(weight) || 0 })) }
     },
     include: { materials: true }
   });
@@ -55,7 +55,7 @@ router.put('/:id', requireAdmin, async (req, res) => {
       tags: JSON.stringify(tags || []),
       questions: JSON.stringify(questions || []),
       quizRequired: Number(quizRequired) || 0,
-      materials: { create: (materials || []).map(({ type, title, url, dataUrl }) => ({ type, title, url: url || null, dataUrl: dataUrl || null })) }
+      materials: { create: (materials || []).map(({ type, title, url, dataUrl, weight }) => ({ type, title, url: url || null, dataUrl: dataUrl || null, weight: Number(weight) || 0 })) }
     },
     include: { materials: true }
   });

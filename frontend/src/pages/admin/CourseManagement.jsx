@@ -35,7 +35,7 @@ const EMPTY_COURSE = {
   questions: [],
   quizRequired: 0,
 };
-const EMPTY_MAT = { type: "pdf", title: "", url: "" };
+const EMPTY_MAT = { type: "pdf", title: "", url: "", weight: 0 };
 const EMPTY_Q = { question: "", choices: ["", "", "", ""], correct: 0 };
 
 export default function CourseManagement({ showToast }) {
@@ -327,11 +327,25 @@ export default function CourseManagement({ showToast }) {
           {/* ── Tab: Materials ── */}
           {modalTab === 'materials' && (
             <div>
+              {/* Total weight indicator */}
+              {form.materials.length > 0 && (() => {
+                const total = form.materials.reduce((s, m) => s + (Number(m.weight) || 0), 0);
+                return (
+                  <div className={`flex items-center justify-between px-3 py-2 rounded-xl mb-3 text-xs font-medium ${total === 100 ? 'bg-emerald-50 text-emerald-700' : total > 100 ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-700'}`}>
+                    <span>รวมตัวชี้วัด</span>
+                    <span>{total}% {total === 100 ? '✓ ครบ 100%' : total > 100 ? '⚠ เกิน 100%' : `(ขาด ${100 - total}%)`}</span>
+                  </div>
+                );
+              })()}
+
               <div className="space-y-2 mb-3">
                 {form.materials.map((m, i) => (
                   <div key={i} className="flex items-center gap-2 p-2.5 bg-slate-50 rounded-xl">
                     <MatBadge type={m.type} />
                     <span className="text-xs text-slate-700 flex-1 truncate">{m.title}</span>
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${Number(m.weight) > 0 ? 'bg-brand-100 text-brand-600' : 'bg-slate-100 text-slate-400'}`}>
+                      {m.weight || 0}%
+                    </span>
                     <button onClick={() => removeMaterial(i)} className="text-slate-400 hover:text-red-500">
                       <Icon name="x" size={13} />
                     </button>
@@ -339,18 +353,31 @@ export default function CourseManagement({ showToast }) {
                 ))}
                 {form.materials.length === 0 && <p className="text-xs text-slate-400 text-center py-4">No materials yet</p>}
               </div>
-              <div className="flex gap-2">
-                <select value={matForm.type} onChange={e => setMatForm(m => ({ ...m, type: e.target.value }))}
-                  className="px-2 py-2 rounded-lg border border-slate-200 text-xs bg-slate-50">
-                  {MATERIAL_TYPES.map(t => <option key={t} value={t}>{t.toUpperCase()}</option>)}
-                </select>
-                <input value={matForm.title} onChange={e => setMatForm(m => ({ ...m, title: e.target.value }))}
-                  placeholder="Title" className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-xs bg-slate-50" />
-                <input value={matForm.url} onChange={e => setMatForm(m => ({ ...m, url: e.target.value }))}
-                  placeholder="URL (optional)" className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-xs bg-slate-50" />
-                <button onClick={addMaterial} className="px-3 py-2 bg-brand-500 text-white rounded-lg text-xs hover:bg-brand-600">
-                  <Icon name="plus" size={13} />
-                </button>
+
+              <div className="border border-slate-200 rounded-xl p-3 space-y-2">
+                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">เพิ่ม Material</p>
+                <div className="flex gap-2">
+                  <select value={matForm.type} onChange={e => setMatForm(m => ({ ...m, type: e.target.value }))}
+                    className="px-2 py-2 rounded-lg border border-slate-200 text-xs bg-slate-50">
+                    {MATERIAL_TYPES.map(t => <option key={t} value={t}>{t.toUpperCase()}</option>)}
+                  </select>
+                  <input value={matForm.title} onChange={e => setMatForm(m => ({ ...m, title: e.target.value }))}
+                    placeholder="ชื่อ Material *" className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-xs bg-slate-50" />
+                </div>
+                <div className="flex gap-2">
+                  <input value={matForm.url} onChange={e => setMatForm(m => ({ ...m, url: e.target.value }))}
+                    placeholder="URL (optional)" className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-xs bg-slate-50" />
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <input type="number" min="0" max="100" value={matForm.weight}
+                      onChange={e => setMatForm(m => ({ ...m, weight: Number(e.target.value) }))}
+                      className="w-16 px-2 py-2 rounded-lg border border-slate-200 text-xs bg-slate-50 text-center focus:outline-none focus:border-brand-500" />
+                    <span className="text-xs text-slate-400">%</span>
+                  </div>
+                  <button onClick={addMaterial} className="px-3 py-2 bg-brand-500 text-white rounded-lg text-xs hover:bg-brand-600">
+                    <Icon name="plus" size={13} />
+                  </button>
+                </div>
+                <p className="text-[10px] text-slate-400">ตัวชี้วัด = เมื่อ User ดู Material นี้เสร็จจะได้ความคืบหน้า % นี้ (ควรรวมกันได้ 100%)</p>
               </div>
             </div>
           )}
