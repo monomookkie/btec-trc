@@ -202,27 +202,7 @@ export default function UserDashboard({ user, showToast }) {
               <p className="text-sm text-slate-500 whitespace-pre-wrap leading-relaxed">{popupAnn.content}</p>
             </div>
 
-            {/* Footer */}
-            <div className="px-6 pb-6 flex gap-3">
-              {popupAnn.link ? (
-                <>
-                  <button onClick={closePopup}
-                    className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-500 text-sm font-medium hover:bg-slate-50 transition-colors">
-                    ปิด
-                  </button>
-                  <a href={popupAnn.link} target="_blank" rel="noopener noreferrer"
-                    onClick={closePopup}
-                    className="flex-1 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold text-center transition-colors">
-                    ดูรายละเอียด →
-                  </a>
-                </>
-              ) : (
-                <button onClick={closePopup}
-                  className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold transition-colors">
-                  รับทราบ
-                </button>
-              )}
-            </div>
+            <div className="pb-2" />
           </div>
         </div>
       )}
