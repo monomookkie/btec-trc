@@ -64,11 +64,22 @@ router.delete('/:id', requireAdmin, async (req, res) => {
 
 // GET /api/certificates/external
 router.get('/external', requireAuth, async (req, res) => {
+  const where = req.user.role === 'ADMIN' ? {} : { userId: req.user.id };
   const certs = await prisma.externalCert.findMany({
-    where: { userId: req.user.id },
+    where,
     orderBy: { createdAt: 'desc' }
   });
   res.json(certs);
+});
+
+// GET /api/certificates/external/all  (admin — with user info)
+router.get('/external/all', requireAdmin, async (req, res) => {
+  const certs = await prisma.externalCert.findMany({
+    orderBy: { createdAt: 'desc' }
+  });
+  const users = await prisma.user.findMany({ select: { id: true, name: true, avatar: true, dept: true } });
+  const userMap = Object.fromEntries(users.map(u => [u.id, u]));
+  res.json(certs.map(c => ({ ...c, user: userMap[c.userId] || null })));
 });
 
 // POST /api/certificates/external

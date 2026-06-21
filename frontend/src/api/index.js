@@ -54,6 +54,7 @@ export const api = {
   issueCertificate: (body) => req('POST', '/certificates/issue', body),
   deleteCertificate: (id) => req('DELETE', `/certificates/${id}`),
   getExternalCerts: () => req('GET', '/certificates/external'),
+  getAllExternalCerts: () => req('GET', '/certificates/external/all'),
   addExternalCert: (body) => req('POST', '/certificates/external', body),
   deleteExternalCert: (id) => req('DELETE', `/certificates/external/${id}`),
 
