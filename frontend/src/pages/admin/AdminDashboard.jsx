@@ -241,7 +241,19 @@ export default function AdminDashboard({ showToast }) {
                   const file = e.target.files[0];
                   if (!file) return;
                   const reader = new FileReader();
-                  reader.onload = ev => setAnnForm(f => ({ ...f, fileData: ev.target.result, fileName: file.name }));
+                  reader.onload = ev => {
+                    const img = new Image();
+                    img.onload = () => {
+                      const MAX_W = 1600;
+                      const scale = img.width > MAX_W ? MAX_W / img.width : 1;
+                      const canvas = document.createElement('canvas');
+                      canvas.width = img.width * scale;
+                      canvas.height = img.height * scale;
+                      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                      setAnnForm(f => ({ ...f, fileData: canvas.toDataURL('image/jpeg', 0.92), fileName: file.name }));
+                    };
+                    img.src = ev.target.result;
+                  };
                   reader.readAsDataURL(file);
                 }} />
             </label>

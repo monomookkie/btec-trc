@@ -39,8 +39,8 @@ function AnnouncementCarousel({ announcements }) {
   const hasImage = a.fileData && a.fileData.startsWith('data:image');
 
   return (
-    <div className="mb-6 -mx-4 md:-mx-7">
-      <div className="relative overflow-hidden select-none"
+    <div className="mb-6">
+      <div className="relative overflow-hidden rounded-2xl shadow-sm select-none"
         onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
 
         {/* Slides */}
@@ -51,9 +51,10 @@ function AnnouncementCarousel({ announcements }) {
             return (
               <div key={ann.id} className="w-full flex-shrink-0 relative">
                 {img ? (
-                  <div className="relative" style={{ paddingBottom: '42%' }}>
+                  <div className="relative w-full" style={{ aspectRatio: '16/6' }}>
                     <img src={ann.fileData} alt={ann.title}
-                      className="absolute inset-0 w-full h-full object-cover" />
+                      className="absolute inset-0 w-full h-full object-cover"
+                      style={{ imageRendering: 'auto' }} />
                     {/* Gradient overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                     {/* Text on image */}
