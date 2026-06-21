@@ -12,6 +12,7 @@ export default function CertificateEngine({ showToast }) {
   const [templates, setTemplates] = useState([]);
   const [externalCerts, setExternalCerts] = useState([]);
   const [users, setUsers] = useState([]);
+  const [search, setSearch] = useState('');
   const [tab, setTab] = useState('certs');
   const [confirmDel, setConfirmDel] = useState(null);
   const [showIssue, setShowIssue] = useState(false);
@@ -103,6 +104,13 @@ export default function CertificateEngine({ showToast }) {
 
       {tab === 'certs' && (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <div className="px-5 py-3 border-b border-slate-100">
+            <div className="relative">
+              <Icon name="search" size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by user or course name…"
+                className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:border-brand-500" />
+            </div>
+          </div>
           <table className="w-full">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50">
@@ -112,7 +120,10 @@ export default function CertificateEngine({ showToast }) {
               </tr>
             </thead>
             <tbody>
-              {certs.map(c => (
+              {certs.filter(c => {
+                const q = search.toLowerCase();
+                return !q || c.user?.name?.toLowerCase().includes(q) || c.course?.title?.toLowerCase().includes(q) || c.certNumber?.toLowerCase().includes(q);
+              }).map(c => (
                 <tr key={c.id} className="border-b border-slate-50 hover:bg-slate-50/60 transition-colors">
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-2.5">
@@ -196,7 +207,7 @@ export default function CertificateEngine({ showToast }) {
         </div>
       )}
 
-      {/* {tab === 'templates' && (
+      {tab === 'templates' && (
         <div className="space-y-3">
           {templates.map(t => (
             <div key={t.id} className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex items-center gap-4">
@@ -213,7 +224,7 @@ export default function CertificateEngine({ showToast }) {
           ))}
           {templates.length === 0 && <div className="text-center py-12 text-slate-400 text-sm">No templates yet.</div>}
         </div>
-      )} */}
+      )}
 
       {/* Issue Modal */}
       <Modal open={showIssue} onClose={() => setShowIssue(false)} title="Issue Certificate" size="440px">
