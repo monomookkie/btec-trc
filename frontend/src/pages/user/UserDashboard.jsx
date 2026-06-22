@@ -151,33 +151,25 @@ export default function UserDashboard({ user, showToast }) {
 
       {/* Announcement Popup */}
       {popupAnn && popupAnn.fileData && popupAnn.fileData.startsWith('data:image') && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center"
-          style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', padding: '20px 16px' }}
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 px-4 py-8"
+          style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}
           onClick={closePopup}>
 
-          <div className="relative" style={{ maxWidth: 'min(720px, 92vw)' }} onClick={e => e.stopPropagation()}>
-            {/* Close button */}
-            <button onClick={closePopup}
-              className="absolute -top-4 -right-4 z-10 w-9 h-9 rounded-full bg-white text-slate-700 text-xl font-bold flex items-center justify-center shadow-xl border-0 hover:bg-slate-100 transition-colors">
-              ×
-            </button>
-
-            {/* Image — natural aspect ratio, fills container width */}
+          <div className="relative w-full" style={{ maxWidth: 680 }} onClick={e => e.stopPropagation()}>
             {popupAnn.link ? (
               <a href={popupAnn.link} target="_blank" rel="noopener noreferrer" onClick={closePopup} className="block">
                 <img src={popupAnn.fileData} alt={popupAnn.title}
-                  className="rounded-2xl shadow-2xl cursor-pointer"
-                  style={{ width: 'min(720px, 92vw)', maxHeight: '78vh', objectFit: 'cover' }} />
+                  className="w-full rounded-2xl shadow-2xl cursor-pointer"
+                  style={{ maxHeight: '72vh', objectFit: 'cover' }} />
               </a>
             ) : (
               <img src={popupAnn.fileData} alt={popupAnn.title}
-                className="rounded-2xl shadow-2xl"
-                style={{ width: 'min(720px, 92vw)', maxHeight: '78vh', objectFit: 'cover' }} />
+                className="w-full rounded-2xl shadow-2xl"
+                style={{ maxHeight: '72vh', objectFit: 'cover' }} />
             )}
           </div>
 
-          {/* Hint */}
-          <p className="mt-5 text-white/50 text-xs tracking-wide">แตะที่อื่นเพื่อปิด</p>
+          <p className="text-white/40 text-xs">แตะที่อื่นเพื่อปิด</p>
         </div>
       )}
 
