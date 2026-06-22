@@ -75,6 +75,7 @@ function AppLayout({ user, onUpdateUser, onLogout, showToast }) {
                 <Route path="/admin/certificates" element={<CertificateEngine {...pageProps} />} />
                 <Route path="/admin/users"        element={<UsersPage {...pageProps} />} />
                 <Route path="/admin/reports"      element={<Reports {...pageProps} />} />
+                <Route path="/profile"            element={<ProfilePage {...pageProps} onUpdate={onUpdateUser} />} />
                 <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
               </>
             ) : (
@@ -86,9 +87,6 @@ function AppLayout({ user, onUpdateUser, onLogout, showToast }) {
                 <Route path="/profile"   element={<ProfilePage {...pageProps} onUpdate={onUpdateUser} />} />
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
               </>
-            )}
-            {user.role === 'ADMIN' && (
-              <Route path="/profile" element={<ProfilePage {...pageProps} onUpdate={onUpdateUser} />} />
             )}
           </Routes>
         </div>

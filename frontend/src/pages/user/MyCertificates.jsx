@@ -3,6 +3,7 @@ import { api } from '../../api';
 import Icon from '../../components/ui/Icon';
 import Badge from '../../components/ui/Badge';
 import Modal from '../../components/ui/Modal';
+import { CertificateSkeleton } from '../../components/ui/Skeleton';
 
 export default function MyCertificates({ user, showToast }) {
   const [certs, setCerts] = useState([]);
@@ -57,7 +58,7 @@ export default function MyCertificates({ user, showToast }) {
     }
   };
 
-  if (loading) return <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Loading…</div>;
+  if (loading) return <CertificateSkeleton />;
 
   const inputClass = 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none focus:border-brand-500 focus:bg-white transition-all';
 

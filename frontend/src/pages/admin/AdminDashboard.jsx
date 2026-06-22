@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../../api';
+import { AdminDashboardSkeleton } from '../../components/ui/Skeleton';
 import Icon from '../../components/ui/Icon';
 import Avatar from '../../components/ui/Avatar';
 import Badge from '../../components/ui/Badge';
@@ -28,7 +29,7 @@ export default function AdminDashboard({ showToast }) {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Loading…</div>;
+  if (loading) return <AdminDashboardSkeleton />;
 
   const statCards = [
     { label: 'Active Users',        val: summary.users,        icon: 'users', color: '#1A56DB', bg: '#EEF3FF' },

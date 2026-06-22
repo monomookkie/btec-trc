@@ -3,6 +3,7 @@ import { api } from '../../api';
 import Avatar from '../../components/ui/Avatar';
 import Badge from '../../components/ui/Badge';
 import Icon from '../../components/ui/Icon';
+import { AdminReportSkeleton } from '../../components/ui/Skeleton';
 
 export default function Reports({ showToast }) {
   const [compliance, setCompliance] = useState([]);
@@ -15,7 +16,7 @@ export default function Reports({ showToast }) {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Loading…</div>;
+  if (loading) return <AdminReportSkeleton />;
 
   return (
     <div className="p-4 md:p-7 page-enter">

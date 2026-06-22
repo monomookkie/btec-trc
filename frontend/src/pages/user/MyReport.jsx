@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '../../api';
 import Badge from '../../components/ui/Badge';
+import { ReportSkeleton } from '../../components/ui/Skeleton';
 
 export default function MyReport({ user, showToast }) {
   const [enrollments, setEnrollments] = useState([]);
@@ -16,7 +17,7 @@ export default function MyReport({ user, showToast }) {
       .finally(() => setLoading(false));
   }, [user.id]);
 
-  if (loading) return <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Loading…</div>;
+  if (loading) return <ReportSkeleton />;
 
   const completed = enrollments.filter(e => e.completed);
   const inProgress = enrollments.filter(e => !e.completed);

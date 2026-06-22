@@ -1,9 +1,8 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import { requireAuth, requireAdmin } from '../middleware/auth.js';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 // GET /api/courses
 router.get('/', requireAuth, async (req, res, next) => {
@@ -46,10 +45,11 @@ router.post('/', requireAdmin, async (req, res, next) => {
         questions: JSON.stringify(questions || []),
         quizRequired: Number(quizRequired) || 0,
         materials: {
-          create: (materials || []).map(({ type, title: mTitle, url, weight }) => ({
+          create: (materials || []).map(({ type, title: mTitle, url, dataUrl, weight }) => ({
             type,
             title: mTitle,
             url: url || null,
+            dataUrl: dataUrl || null,
             weight: Number(weight) || 0
           }))
         }

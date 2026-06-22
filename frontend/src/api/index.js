@@ -23,6 +23,7 @@ export const api = {
   login: (email, password) => req('POST', '/auth/login', { email, password }),
   register: (body) => req('POST', '/auth/register', body),
   forgotPassword: (email) => req('POST', '/auth/forgot-password', { email }),
+  verifyOtp: (email, otp) => req('POST', '/auth/verify-otp', { email, otp }),
   resetPassword: (email, newPassword) => req('POST', '/auth/reset-password', { email, newPassword }),
 
   // Users

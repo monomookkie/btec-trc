@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../api';
+import { UserDashboardSkeleton } from '../../components/ui/Skeleton';
 import Icon from '../../components/ui/Icon';
 import Badge from '../../components/ui/Badge';
 
@@ -140,7 +141,7 @@ export default function UserDashboard({ user, showToast }) {
 
   const closePopup = () => setPopupAnn(null);
 
-  if (loading) return <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Loading…</div>;
+  if (loading) return <UserDashboardSkeleton />;
 
   const completed = enrollments.filter(e => e.completed);
   const inProgress = enrollments.filter(e => !e.completed);
@@ -221,8 +222,26 @@ export default function UserDashboard({ user, showToast }) {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex items-center justify-center">
-          <p className="text-xs text-slate-300">—</p>
+        <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+          <h3 className="text-sm font-semibold text-navy-900 mb-4">สรุปผล</h3>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between py-2 border-b border-slate-50">
+              <span className="text-xs text-slate-500">หลักสูตรที่ลงทะเบียน</span>
+              <span className="text-sm font-bold text-navy-900">{enrollments.length}</span>
+            </div>
+            <div className="flex items-center justify-between py-2 border-b border-slate-50">
+              <span className="text-xs text-slate-500">ผ่านแล้ว</span>
+              <span className="text-sm font-bold text-emerald-600">{completed.length}</span>
+            </div>
+            <div className="flex items-center justify-between py-2 border-b border-slate-50">
+              <span className="text-xs text-slate-500">กำลังเรียน</span>
+              <span className="text-sm font-bold text-blue-600">{inProgress.length}</span>
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <span className="text-xs text-slate-500">ใบประกาศนียบัตร</span>
+              <span className="text-sm font-bold text-amber-500">{certs.length}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

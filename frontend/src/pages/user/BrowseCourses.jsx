@@ -3,6 +3,7 @@ import { api } from '../../api';
 import Icon from '../../components/ui/Icon';
 import Badge from '../../components/ui/Badge';
 import Modal from '../../components/ui/Modal';
+import { BrowseCourseSkeleton } from '../../components/ui/Skeleton';
 
 const TYPE_META = {
   pdf:   { label: 'PDF', color: 'red' }, word: { label: 'DOC', color: 'blue' },
@@ -164,6 +165,7 @@ export default function BrowseCourses({ user, showToast }) {
       fetch(m.dataUrl).then(r => r.blob()).then(blob => {
         const url = URL.createObjectURL(blob);
         window.open(url, '_blank');
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
       });
       if (!isDone) startCountdown(m.id);
     } else {
@@ -229,7 +231,7 @@ export default function BrowseCourses({ user, showToast }) {
     }
   };
 
-  if (loading) return <div className="flex items-center justify-center h-64 text-slate-400 text-sm">Loading…</div>;
+  if (loading) return <BrowseCourseSkeleton />;
 
   return (
     <div className="p-4 md:p-7 page-enter">
