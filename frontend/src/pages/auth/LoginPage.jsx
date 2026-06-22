@@ -89,10 +89,10 @@ export default function LoginPage({ onLogin, onRegister }) {
             </button>
             <div className="mt-3.5 text-center">
               <button onClick={() => { setView('register'); setRegErr({}); }} className="text-xs text-brand-500 font-medium hover:underline">
-                ยังไม่มีบัญชี? สมัครสมาชิก
+                Don't have an account? Register
               </button>
             </div>
-            <p className="mt-4 text-center text-xs text-slate-400">หากลืมรหัสผ่าน กรุณาติดต่อผู้ดูแลระบบ</p>
+            <p className="mt-4 text-center text-xs text-slate-400">Forgot your password? Please contact your administrator.</p>
           </div>
         </div>
       </div>
@@ -112,7 +112,7 @@ export default function LoginPage({ onLogin, onRegister }) {
               { label: 'Email *', val: regEmail, set: setRegEmail, err: regErr.email, ph: `name@${ALLOWED_DOMAIN}`, type: 'email' },
               { label: 'Password *', val: regPass, set: setRegPass, err: regErr.pass, ph: 'min 6 characters', type: 'password' },
               { label: 'Department', val: regDept, set: setRegDept, ph: 'e.g. Blood Screening' },
-              { label: 'ตำแหน่งงาน', val: regPosition, set: setRegPosition, ph: 'e.g. นักเทคนิคการแพทย์' },
+              { label: 'Job Position', val: regPosition, set: setRegPosition, ph: 'e.g. Medical Technologist' },
             ].map(({ label, val, set, err, ph, type }) => (
               <div key={label}>
                 <label className="block text-xs font-medium text-slate-500 mb-1.5">{label}</label>
