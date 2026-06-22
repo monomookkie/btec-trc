@@ -135,7 +135,7 @@ model CertTemplate {
   footerText    String  @db.Text
   primaryColor  String  @default("#1A56DB")
   accentColor   String  @default("#C0392B")
-  logoText      String  @default("HML")
+  logoText      String  @default("BTEC")
   bgImage       String? @db.LongText
   isDefault     Boolean @default(false)
 }

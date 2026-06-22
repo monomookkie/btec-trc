@@ -146,7 +146,7 @@ export default function TrainingLogger({ showToast }) {
             </div>
             <div>
               <label className="block text-xs font-medium text-slate-500 mb-1.5">Doc No.</label>
-              <input value={form.doc} onChange={e => setForm(f => ({ ...f, doc: e.target.value }))} className={inputCls} placeholder="HML-TR-2025-001" />
+              <input value={form.doc} onChange={e => setForm(f => ({ ...f, doc: e.target.value }))} className={inputCls} placeholder="BTEC-TR-2025-001" />
             </div>
           </div>
           <div>

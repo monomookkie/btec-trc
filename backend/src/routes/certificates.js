@@ -9,7 +9,7 @@ function genCertNumber() {
   const mm = String(date.getMonth() + 1).padStart(2, '0');
   const dd = String(date.getDate()).padStart(2, '0');
   const rand = String(Math.floor(Math.random() * 9000) + 1000);
-  return `HML-${date.getFullYear()}-${mm}${dd}-${rand}`;
+  return `BTEC-${date.getFullYear()}-${mm}${dd}-${rand}`;
 }
 
 // GET /api/certificates

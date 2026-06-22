@@ -5,6 +5,7 @@ import Avatar from '../../components/ui/Avatar';
 import Badge from '../../components/ui/Badge';
 import Modal from '../../components/ui/Modal';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
+import { CertificateEngineSkeleton } from '../../components/ui/Skeleton';
 
 export default function CertificateEngine({ showToast }) {
   const [certs, setCerts] = useState([]);
@@ -24,6 +25,7 @@ export default function CertificateEngine({ showToast }) {
   const [issueEnrId, setIssueEnrId] = useState('');
   const [issueScore, setIssueScore] = useState('');
   const [loading, setLoading] = useState(false);
+  const [initLoading, setInitLoading] = useState(true);
 
   const load = async () => {
     const [c, e, t, ex, u] = await Promise.all([api.getCertificates(), api.getEnrollments(), api.getCertTemplates(), api.getAllExternalCerts(), api.getUsers()]);
@@ -34,7 +36,9 @@ export default function CertificateEngine({ showToast }) {
     setUsers(u);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load().finally(() => setInitLoading(false)); }, []);
+
+  if (initLoading) return <CertificateEngineSkeleton />;
 
   const handleIssue = async () => {
     if (!issueEnrId || !issueScore) { showToast('Select enrollment and enter score', 'error'); return; }

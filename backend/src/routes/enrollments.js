@@ -9,7 +9,7 @@ function genCertNumber() {
   const mm = String(date.getMonth() + 1).padStart(2, '0');
   const dd = String(date.getDate()).padStart(2, '0');
   const rand = String(Math.floor(Math.random() * 9000) + 1000);
-  return `HML-${date.getFullYear()}-${mm}${dd}-${rand}`;
+  return `BTEC-${date.getFullYear()}-${mm}${dd}-${rand}`;
 }
 
 // GET /api/enrollments  (admin: all, user: own)
@@ -107,6 +107,18 @@ router.post('/:id/material/:materialId', requireAuth, async (req, res, next) => 
         ...(shouldComplete && !enrollment.completed ? { completed: true, completedAt: new Date() } : {})
       }
     });
+
+    // Auto-issue cert for no-quiz courses (score = 100)
+    if (shouldComplete && !enrollment.completed && !hasQuiz) {
+      const existing = await prisma.certificate.findUnique({ where: { enrollmentId: req.params.id } });
+      if (!existing) {
+        await prisma.enrollment.update({ where: { id: req.params.id }, data: { score: 100 } });
+        await prisma.certificate.create({
+          data: { enrollmentId: updated.id, userId: enrollment.userId, courseId: enrollment.courseId, certNumber: genCertNumber(), score: 100 }
+        });
+      }
+    }
+
     res.json({ completedMaterials: completed, progress: updated.progress, completed: updated.completed });
   } catch (e) { next(e); }
 });
@@ -130,15 +142,28 @@ router.post('/:id/quiz', requireAuth, async (req, res, next) => {
     if (!enrollment) return res.status(404).json({ error: 'Not found' });
     if (enrollment.userId !== req.user.id) return res.status(403).json({ error: 'Forbidden' });
 
+    const quizScore = Math.round((correct / total) * 100);
     const shouldComplete = enrollment.progress >= 100 && passed;
     const updated = await prisma.enrollment.update({
       where: { id: req.params.id },
       data: {
         quizPassed: passed,
-        quizScore: Math.round((correct / total) * 100),
+        quizScore,
+        score: quizScore,
         ...(shouldComplete && !enrollment.completed ? { completed: true, completedAt: new Date() } : {})
       }
     });
+
+    // Auto-issue cert when quiz passed and completed
+    if (shouldComplete && !enrollment.completed) {
+      const existing = await prisma.certificate.findUnique({ where: { enrollmentId: req.params.id } });
+      if (!existing && quizScore >= enrollment.course.passScore) {
+        await prisma.certificate.create({
+          data: { enrollmentId: updated.id, userId: enrollment.userId, courseId: enrollment.courseId, certNumber: genCertNumber(), score: quizScore }
+        });
+      }
+    }
+
     res.json({ quizPassed: updated.quizPassed, quizScore: updated.quizScore, completed: updated.completed });
   } catch (e) { next(e); }
 });

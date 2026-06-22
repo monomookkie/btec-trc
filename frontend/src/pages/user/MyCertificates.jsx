@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { api } from '../../api';
 import Icon from '../../components/ui/Icon';
 import Badge from '../../components/ui/Badge';
@@ -14,6 +14,31 @@ export default function MyCertificates({ user, showToast }) {
   const [fileData, setFileData] = useState(null);
   const [fileName, setFileName] = useState('');
   const [saving, setSaving] = useState(false);
+  const [downloadingId, setDownloadingId] = useState(null);
+  const certRefs = useRef({});
+
+  const handleDownload = async (c) => {
+    setDownloadingId(c.id);
+    try {
+      const { default: html2canvas } = await import('html2canvas');
+      const { default: jsPDF } = await import('jspdf');
+      const el = certRefs.current[c.id];
+      const canvas = await html2canvas(el, { scale: 3, useCORS: true, backgroundColor: null });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const pw = pdf.internal.pageSize.getWidth();
+      const ph = pdf.internal.pageSize.getHeight();
+      const ratio = canvas.width / canvas.height;
+      let w = pw - 20, h = w / ratio;
+      if (h > ph - 20) { h = ph - 20; w = h * ratio; }
+      pdf.addImage(imgData, 'PNG', (pw - w) / 2, (ph - h) / 2, w, h);
+      pdf.save(`Certificate-${c.certNumber}.pdf`);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   useEffect(() => {
     Promise.all([api.getCertificates(), api.getExternalCerts()])
@@ -82,21 +107,36 @@ export default function MyCertificates({ user, showToast }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             {certs.map(c => (
               <div key={c.id} className="bg-white rounded-2xl border border-slate-100 p-5 md:p-6 shadow-sm">
-                <div className="rounded-xl p-4 md:p-5 mb-4 text-white text-center" style={{ background: 'linear-gradient(135deg,#0D1B2A,#1A56DB)' }}>
-                  <div className="font-mono font-bold text-2xl mb-1">HML</div>
+                {/* cert card — captured for PDF */}
+                <div ref={el => certRefs.current[c.id] = el}
+                  className="rounded-xl p-4 md:p-5 mb-4 text-white text-center"
+                  style={{ background: 'linear-gradient(135deg,#0D1B2A,#1A56DB)' }}>
+                  <img src="/logo.png" alt="Logo" className="w-12 h-12 mx-auto mb-1 object-contain" />
                   <div className="text-[10px] uppercase tracking-widest opacity-60 mb-4">Certificate of Completion</div>
                   <div className="text-xs opacity-70 mb-1">This certifies that</div>
                   <div className="font-semibold text-base mb-1">{user.name}</div>
                   <div className="text-xs opacity-70 mb-3">has successfully completed</div>
                   <div className="text-sm font-medium px-4 leading-snug">{c.course?.title}</div>
-                  <div className="mt-4 font-mono text-[10px] opacity-40">{c.certNumber}</div>
+                  <div className="mt-3 text-[10px] opacity-50">Score: {c.score}% · Issued {new Date(c.issuedAt).toLocaleDateString('th-TH')}</div>
+                  <div className="mt-1 font-mono text-[10px] opacity-30">{c.certNumber}</div>
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="text-xs text-slate-500 mb-0.5">{c.course?.category}</div>
                     <div className="text-[11px] text-slate-400">Issued {new Date(c.issuedAt).toLocaleDateString()}</div>
                   </div>
-                  <Badge variant="green" className="text-sm font-semibold">{c.score}%</Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="green" className="text-sm font-semibold">{c.score}%</Badge>
+                    <button onClick={() => handleDownload(c)} disabled={downloadingId === c.id}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-medium transition-colors disabled:opacity-60">
+                      {downloadingId === c.id ? (
+                        <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block" />
+                      ) : (
+                        <Icon name="download" size={12} />
+                      )}
+                      {downloadingId === c.id ? 'Generating…' : 'Download PDF'}
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

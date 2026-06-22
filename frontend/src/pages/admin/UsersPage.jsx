@@ -5,6 +5,7 @@ import Avatar from '../../components/ui/Avatar';
 import Badge from '../../components/ui/Badge';
 import Modal from '../../components/ui/Modal';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
+import { UsersPageSkeleton } from '../../components/ui/Skeleton';
 
 const EMPTY_FORM = { name: '', email: '', password: '', role: 'USER', dept: '' };
 
@@ -15,9 +16,12 @@ export default function UsersPage({ showToast }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [confirmDel, setConfirmDel] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [initLoading, setInitLoading] = useState(true);
   const [search, setSearch] = useState('');
 
-  useEffect(() => { api.getUsers().then(setUsers); }, []);
+  useEffect(() => { api.getUsers().then(setUsers).finally(() => setInitLoading(false)); }, []);
+
+  if (initLoading) return <UsersPageSkeleton />;
 
   const filtered = users.filter(u =>
     u.name.toLowerCase().includes(search.toLowerCase()) ||

@@ -161,6 +161,105 @@ export function ReportSkeleton() {
   );
 }
 
+// ProfilePage
+export function ProfileSkeleton() {
+  return (
+    <div className="p-4 md:p-7 max-w-xl space-y-4">
+      <div className="space-y-1">
+        <Skeleton className="h-7 w-24" />
+        <Skeleton className="h-4 w-48" />
+      </div>
+      {/* Avatar card */}
+      <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex items-center gap-4">
+        <Skeleton className="w-13 h-13 rounded-full flex-shrink-0" style={{ width: 52, height: 52, borderRadius: '50%' }} />
+        <div className="space-y-2 flex-1">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-3 w-44" />
+          <Skeleton className="h-3 w-16" />
+        </div>
+      </div>
+      {/* Info card */}
+      <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm space-y-4">
+        <Skeleton className="h-4 w-36" />
+        <div className="space-y-3">
+          {[0,1,2].map(i => (
+            <div key={i} className="space-y-1.5">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-10 w-full rounded-xl" />
+            </div>
+          ))}
+        </div>
+        <Skeleton className="h-10 w-28 rounded-xl" />
+      </div>
+      {/* Password card */}
+      <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm space-y-4">
+        <Skeleton className="h-4 w-32" />
+        <div className="space-y-3">
+          {[0,1,2].map(i => (
+            <div key={i} className="space-y-1.5">
+              <Skeleton className="h-3 w-28" />
+              <Skeleton className="h-10 w-full rounded-xl" />
+            </div>
+          ))}
+        </div>
+        <Skeleton className="h-10 w-32 rounded-xl" />
+      </div>
+    </div>
+  );
+}
+
+// UsersPage
+export function UsersPageSkeleton() {
+  return (
+    <div className="p-4 md:p-7 space-y-4 md:space-y-5">
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-6 w-24" />
+        <Skeleton className="h-9 w-28 rounded-xl" />
+      </div>
+      <Skeleton className="h-9 w-full rounded-xl" />
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 md:p-5">
+        {[0,1,2,3,4,5,6].map(i => <SkeletonRow key={i} cols={4} />)}
+      </div>
+    </div>
+  );
+}
+
+// CourseManagement
+export function CourseManagementSkeleton() {
+  return (
+    <div className="p-4 md:p-7 space-y-4 md:space-y-5">
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-6 w-32" />
+        <Skeleton className="h-9 w-32 rounded-xl" />
+      </div>
+      <div className="flex gap-2 flex-wrap">
+        {[0,1,2,3].map(i => <Skeleton key={i} className="h-8 w-20 rounded-full" />)}
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {[0,1,2,3,4,5].map(i => <SkeletonCourseCard key={i} />)}
+      </div>
+    </div>
+  );
+}
+
+// CertificateEngine
+export function CertificateEngineSkeleton() {
+  return (
+    <div className="p-4 md:p-7 space-y-4 md:space-y-5">
+      <div className="flex gap-2 mb-2">
+        {[0,1,2].map(i => <Skeleton key={i} className="h-9 w-28 rounded-xl" />)}
+      </div>
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 md:p-5">
+        <div className="flex items-center justify-between mb-4">
+          <Skeleton className="h-5 w-32" />
+          <Skeleton className="h-8 w-28 rounded-xl" />
+        </div>
+        {[0,1,2,3,4].map(i => <SkeletonRow key={i} cols={5} />)}
+      </div>
+    </div>
+  );
+}
+
 // Admin Reports
 export function AdminReportSkeleton() {
   return (

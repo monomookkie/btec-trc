@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { api } from '../api';
 import Avatar from '../components/ui/Avatar';
 import Icon from '../components/ui/Icon';
+import { ProfileSkeleton } from '../components/ui/Skeleton';
 
 export default function ProfilePage({ user, onUpdate, showToast }) {
+  const [initLoading, setInitLoading] = useState(true);
   const [name, setName] = useState(user.name);
   const [dept, setDept] = useState(user.dept || '');
   const [currentPassword, setCurrentPassword] = useState('');
@@ -11,6 +13,11 @@ export default function ProfilePage({ user, onUpdate, showToast }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loadingProfile, setLoadingProfile] = useState(false);
   const [loadingPass, setLoadingPass] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setInitLoading(false), 300);
+    return () => clearTimeout(t);
+  }, []);
 
   const handleSaveProfile = async () => {
     if (!name.trim()) return showToast('Name is required', 'error');
@@ -41,6 +48,8 @@ export default function ProfilePage({ user, onUpdate, showToast }) {
       setLoadingPass(false);
     }
   };
+
+  if (initLoading) return <ProfileSkeleton />;
 
   const inputClass = 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm outline-none focus:border-brand-500 focus:bg-white transition-all';
 

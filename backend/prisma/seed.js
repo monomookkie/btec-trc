@@ -115,11 +115,11 @@ async function main() {
   const pad = (n) => String(n).padStart(3, '0');
   await prisma.certificate.createMany({
     data: [
-      { enrollmentId: e1.id, userId: james.id, courseId: c1.id, issuedAt: new Date('2025-02-14'), certNumber: 'HML-2025-0214-001', score: 92 },
-      { enrollmentId: e4.id, userId: priya.id, courseId: c1.id, issuedAt: new Date('2025-02-20'), certNumber: 'HML-2025-0220-002', score: 88 },
-      { enrollmentId: e5.id, userId: priya.id, courseId: c2.id, issuedAt: new Date('2025-03-05'), certNumber: 'HML-2025-0305-003', score: 91 },
-      { enrollmentId: e6.id, userId: priya.id, courseId: c3.id, issuedAt: new Date('2025-03-10'), certNumber: 'HML-2025-0310-004', score: 84 },
-      { enrollmentId: e8.id, userId: marcus.id, courseId: c5.id, issuedAt: new Date('2025-03-15'), certNumber: 'HML-2025-0315-005', score: 95 }
+      { enrollmentId: e1.id, userId: james.id, courseId: c1.id, issuedAt: new Date('2025-02-14'), certNumber: 'BTEC-2025-0214-001', score: 92 },
+      { enrollmentId: e4.id, userId: priya.id, courseId: c1.id, issuedAt: new Date('2025-02-20'), certNumber: 'BTEC-2025-0220-002', score: 88 },
+      { enrollmentId: e5.id, userId: priya.id, courseId: c2.id, issuedAt: new Date('2025-03-05'), certNumber: 'BTEC-2025-0305-003', score: 91 },
+      { enrollmentId: e6.id, userId: priya.id, courseId: c3.id, issuedAt: new Date('2025-03-10'), certNumber: 'BTEC-2025-0310-004', score: 84 },
+      { enrollmentId: e8.id, userId: marcus.id, courseId: c5.id, issuedAt: new Date('2025-03-15'), certNumber: 'BTEC-2025-0315-005', score: 95 }
     ]
   });
 
@@ -128,7 +128,7 @@ async function main() {
     data: {
       title: 'Annual BioSafety Refresher', date: new Date('2025-01-25'), trainer: 'Dr. Lena Kovacs',
       location: 'Training Lab B', duration: 180, type: 'classroom',
-      topics: 'Level 2 biosafety precautions, PPE donning/doffing, spill decontamination procedure, waste segregation.', doc: 'HML-TR-2025-001',
+      topics: 'Level 2 biosafety precautions, PPE donning/doffing, spill decontamination procedure, waste segregation.', doc: 'BTEC-TR-2025-001',
       attendees: { create: [{ userId: james.id }, { userId: priya.id }, { userId: marcus.id }] }
     }
   });
@@ -137,7 +137,7 @@ async function main() {
     data: {
       title: 'NAT Instrument Calibration Workshop', date: new Date('2025-02-05'), trainer: 'Vendor Representative (Roche)',
       location: 'Main Screening Lab', duration: 240, type: 'practical',
-      topics: 'cobas 6800 daily calibration, preventive maintenance schedule, troubleshooting common error codes.', doc: 'HML-TR-2025-002',
+      topics: 'cobas 6800 daily calibration, preventive maintenance schedule, troubleshooting common error codes.', doc: 'BTEC-TR-2025-002',
       attendees: { create: [{ userId: james.id }, { userId: priya.id }] }
     }
   });
@@ -146,7 +146,7 @@ async function main() {
     data: {
       title: 'New Donor Deferral Policy Briefing', date: new Date('2025-03-01'), trainer: 'Dr. Sarah Chen',
       location: 'Conference Room A', duration: 60, type: 'classroom',
-      topics: 'Updated WHO/AABB deferral criteria for 2025, documentation requirements, staff Q&A.', doc: 'HML-TR-2025-003',
+      topics: 'Updated WHO/AABB deferral criteria for 2025, documentation requirements, staff Q&A.', doc: 'BTEC-TR-2025-003',
       attendees: { create: [{ userId: james.id }, { userId: priya.id }, { userId: marcus.id }] }
     }
   });
@@ -166,7 +166,7 @@ async function main() {
       orgSubtitle: 'Accredited Blood Donation Screening Laboratory', signatory: 'Dr. Sarah Chen',
       signatoryTitle: 'Laboratory Director & Chief Pathologist',
       footerText: 'This certificate is issued in accordance with ISO 15189:2022 and AABB Accreditation Standards.',
-      primaryColor: '#1A56DB', accentColor: '#C0392B', logoText: 'HML', isDefault: true
+      primaryColor: '#1A56DB', accentColor: '#C0392B', logoText: 'BTEC', isDefault: true
     }
   });
 

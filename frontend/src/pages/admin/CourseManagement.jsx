@@ -4,6 +4,7 @@ import Icon from "../../components/ui/Icon";
 import Badge from "../../components/ui/Badge";
 import Modal from "../../components/ui/Modal";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
+import { CourseManagementSkeleton } from "../../components/ui/Skeleton";
 
 const MATERIAL_TYPES = ["pdf", "word", "ppt", "video", "link"];
 const TYPE_META = {
@@ -51,6 +52,7 @@ export default function CourseManagement({ showToast }) {
   const [confirmDel, setConfirmDel] = useState(null);
   const [matForm, setMatForm] = useState(EMPTY_MAT);
   const [loading, setLoading] = useState(false);
+  const [initLoading, setInitLoading] = useState(true);
   const [userSearch, setUserSearch] = useState('');
   const [qForm, setQForm] = useState(EMPTY_Q);
   const [courseEnrollments, setCourseEnrollments] = useState([]);
@@ -59,9 +61,10 @@ export default function CourseManagement({ showToast }) {
   const load = () => Promise.all([api.getCourses(), api.getEnrollments()])
     .then(([c, e]) => { setCourses(c); setEnrollments(e); });
   useEffect(() => {
-    load();
-    api.getUsers().then(setUsers);
+    Promise.all([load(), api.getUsers().then(setUsers)]).finally(() => setInitLoading(false));
   }, []);
+
+  if (initLoading) return <CourseManagementSkeleton />;
 
   // Re-fetch users every time the assign tab is opened
   useEffect(() => {
