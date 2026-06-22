@@ -117,7 +117,7 @@ export default function MyCertificates({ user, showToast }) {
                   <div className="font-semibold text-base mb-1">{user.name}</div>
                   <div className="text-xs opacity-70 mb-3">has successfully completed</div>
                   <div className="text-sm font-medium px-4 leading-snug">{c.course?.title}</div>
-                  <div className="mt-3 text-[10px] opacity-50">Score: {c.score}% · Issued {new Date(c.issuedAt).toLocaleDateString('th-TH')}</div>
+                  <div className="mt-3 text-[10px] opacity-50">Score: {c.score}% · Issued {new Date(c.issuedAt).toLocaleDateString('en-GB')}</div>
                   <div className="mt-1 font-mono text-[10px] opacity-30">{c.certNumber}</div>
                 </div>
                 <div className="flex items-center justify-between">

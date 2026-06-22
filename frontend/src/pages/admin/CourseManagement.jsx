@@ -286,7 +286,7 @@ export default function CourseManagement({ showToast }) {
               {(() => {
                 const courseEnrs = enrollments.filter(e => e.courseId === c.id);
                 if (courseEnrs.length === 0) return (
-                  <p className="text-[11px] text-slate-300 italic">ยังไม่มีผู้เรียน</p>
+                  <p className="text-[11px] text-slate-300 italic">No learners yet</p>
                 );
                 return (
                   <div className="flex flex-wrap gap-2">
@@ -406,8 +406,8 @@ export default function CourseManagement({ showToast }) {
                 const total = form.materials.reduce((s, m) => s + (Number(m.weight) || 0), 0);
                 return (
                   <div className={`flex items-center justify-between px-3 py-2 rounded-xl mb-3 text-xs font-medium ${total === 100 ? 'bg-emerald-50 text-emerald-700' : total > 100 ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-700'}`}>
-                    <span>รวมตัวชี้วัด</span>
-                    <span>{total}% {total === 100 ? '✓ ครบ 100%' : total > 100 ? '⚠ เกิน 100%' : `(ขาด ${100 - total}%)`}</span>
+                    <span>Total Weight</span>
+                    <span>{total}% {total === 100 ? '✓ Complete' : total > 100 ? '⚠ Over 100%' : `(${100 - total}% remaining)`}</span>
                   </div>
                 );
               })()}
@@ -439,14 +439,14 @@ export default function CourseManagement({ showToast }) {
               </div>
 
               <div className="border border-slate-200 rounded-xl p-3 space-y-2">
-                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">เพิ่ม Material</p>
+                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Add Material</p>
                 <div className="flex gap-2">
                   <select value={matForm.type} onChange={e => setMatForm(m => ({ ...m, type: e.target.value }))}
                     className="px-2 py-2 rounded-lg border border-slate-200 text-xs bg-slate-50">
                     {MATERIAL_TYPES.map(t => <option key={t} value={t}>{t.toUpperCase()}</option>)}
                   </select>
                   <input value={matForm.title} onChange={e => setMatForm(m => ({ ...m, title: e.target.value }))}
-                    placeholder="ชื่อ Material *" className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-xs bg-slate-50" />
+                    placeholder="Material title *" className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-xs bg-slate-50" />
                 </div>
 
                 {/* URL / Upload toggle */}
@@ -455,7 +455,7 @@ export default function CourseManagement({ showToast }) {
                     <button key={mode} type="button"
                       onClick={() => setMatForm(m => ({ ...m, inputMode: mode, url: '', dataUrl: null }))}
                       className={`px-3 py-1.5 text-[11px] font-medium transition-colors ${matForm.inputMode === mode ? 'bg-brand-500 text-white' : 'bg-white text-slate-500 hover:bg-slate-50'}`}>
-                      {mode === 'url' ? 'ใส่ URL' : 'อัพโหลดไฟล์'}
+                      {mode === 'url' ? 'Enter URL' : 'Upload File'}
                     </button>
                   ))}
                 </div>
@@ -469,7 +469,7 @@ export default function CourseManagement({ showToast }) {
                       <label className={`flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed cursor-pointer transition-colors ${matForm.dataUrl ? 'border-emerald-400 bg-emerald-50' : 'border-slate-300 bg-slate-50 hover:bg-slate-100'}`}>
                         <Icon name="upload" size={13} className="text-slate-400 flex-shrink-0" />
                         <span className="text-xs text-slate-500 truncate">
-                          {matForm.fileName || 'เลือกไฟล์...'}
+                          {matForm.fileName || 'Choose file...'}
                         </span>
                         <input type="file" className="hidden"
                           accept=".pdf,.doc,.docx,.ppt,.pptx,.mp4,.mov,.png,.jpg,.jpeg"
@@ -494,7 +494,7 @@ export default function CourseManagement({ showToast }) {
                     <Icon name="plus" size={13} />
                   </button>
                 </div>
-                <p className="text-[10px] text-slate-400">ตัวชี้วัด = เมื่อ User ดู Material นี้เสร็จจะได้ความคืบหน้า % นี้ (ควรรวมกันได้ 100%)</p>
+                <p className="text-[10px] text-slate-400">Weight = progress % gained when user completes this material (total should equal 100%)</p>
               </div>
             </div>
           )}
@@ -503,11 +503,11 @@ export default function CourseManagement({ showToast }) {
           {modalTab === 'quiz' && (
             <div className="space-y-3">
               <div className="flex items-center gap-2 bg-slate-50 rounded-xl p-3">
-                <span className="text-xs text-slate-500">ต้องตอบถูก</span>
+                <span className="text-xs text-slate-500">Must answer correctly</span>
                 <input type="number" min="0" max={form.questions.length} value={form.quizRequired}
                   onChange={e => setForm(f => ({ ...f, quizRequired: Number(e.target.value) }))}
                   className="w-16 px-2 py-1 rounded-lg border border-slate-200 bg-white text-xs text-center focus:outline-none focus:border-brand-500" />
-                <span className="text-xs text-slate-500">/ {form.questions.length} ข้อ ถึงจะผ่าน</span>
+                <span className="text-xs text-slate-500">/ {form.questions.length} questions to pass</span>
               </div>
 
               {form.questions.length > 0 && (
@@ -533,28 +533,28 @@ export default function CourseManagement({ showToast }) {
               )}
 
               <div className="border border-slate-200 rounded-xl p-3 space-y-2">
-                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">เพิ่มคำถามใหม่</p>
+                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Add New Question</p>
                 <input value={qForm.question} onChange={e => setQForm(q => ({ ...q, question: e.target.value }))}
-                  placeholder="คำถาม *"
+                  placeholder="Question *"
                   className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-xs focus:outline-none focus:border-brand-500" />
                 <div className="grid grid-cols-2 gap-2">
                   {qForm.choices.map((c, i) => (
                     <div key={i} className="flex items-center gap-1.5">
                       <input type="radio" name="correct" checked={qForm.correct === i}
                         onChange={() => setQForm(q => ({ ...q, correct: i }))}
-                        className="accent-emerald-500 flex-shrink-0" title="เลือกเป็นเฉลย" />
+                        className="accent-emerald-500 flex-shrink-0" title="Set as correct answer" />
                       <input value={c} onChange={e => {
                         const choices = [...qForm.choices]; choices[i] = e.target.value;
                         setQForm(q => ({ ...q, choices }));
-                      }} placeholder={`ตัวเลือก ${i + 1} *`}
+                      }} placeholder={`Choice ${i + 1} *`}
                         className="flex-1 px-2 py-1.5 rounded-lg border border-slate-200 bg-white text-xs focus:outline-none focus:border-brand-500" />
                     </div>
                   ))}
                 </div>
                 <div className="flex items-center justify-between pt-1">
-                  <span className="text-[10px] text-slate-400">กด ● หน้าตัวเลือกเพื่อเลือกเฉลย</span>
+                  <span className="text-[10px] text-slate-400">Click ● next to a choice to mark it as correct answer</span>
                   <button onClick={addQuestion} className="px-3 py-1.5 bg-brand-500 text-white rounded-lg text-xs hover:bg-brand-600 transition-colors">
-                    + เพิ่มคำถาม
+                    + Add Question
                   </button>
                 </div>
               </div>
@@ -567,10 +567,10 @@ export default function CourseManagement({ showToast }) {
               {/* Confirmed list (edit = enrolled, new = selectedUsers) */}
               <div>
                 <p className="text-xs font-semibold text-slate-500 mb-2">
-                  {editId ? `ผู้เรียนปัจจุบัน (${courseEnrollments.length} คน)` : `จะ Enroll (${selectedUsers.length} คน)`}
+                  {editId ? `Current Learners (${courseEnrollments.length})` : `To Enroll (${selectedUsers.length})`}
                 </p>
                 {(editId ? courseEnrollments.length === 0 : selectedUsers.length === 0) ? (
-                  <p className="text-xs text-slate-400 text-center py-3 bg-slate-50 rounded-xl">ยังไม่มีผู้เรียน</p>
+                  <p className="text-xs text-slate-400 text-center py-3 bg-slate-50 rounded-xl">No learners yet</p>
                 ) : (
                   <div className="border border-slate-200 rounded-xl overflow-hidden max-h-40 overflow-y-auto">
                     {editId
@@ -585,7 +585,7 @@ export default function CourseManagement({ showToast }) {
                             </div>
                             <div className="flex items-center gap-2">
                               <span className="text-[10px] text-slate-400">{e.progress}%</span>
-                              {e.completed && <Badge variant="green" className="text-[9px]">สำเร็จ</Badge>}
+                              {e.completed && <Badge variant="green" className="text-[9px]">Done</Badge>}
                               <button onClick={() => handleUnenroll(e.id)} className="text-slate-300 hover:text-red-500 transition-colors">
                                 <Icon name="x" size={13} />
                               </button>
@@ -617,7 +617,7 @@ export default function CourseManagement({ showToast }) {
               {/* User picker */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-semibold text-slate-500">เพิ่มผู้เรียน</p>
+                  <p className="text-xs font-semibold text-slate-500">Add Learners</p>
                   <button type="button" onClick={togglePickerAll} className="text-xs text-slate-400 hover:text-brand-500 transition-colors">
                     {pickerChecked.length > 0 && pickerChecked.length === users.filter(u =>
                       u.role === 'USER' && !selectedUsers.includes(u.id) && !courseEnrollments.find(e => e.userId === u.id)
@@ -663,7 +663,7 @@ export default function CourseManagement({ showToast }) {
                 {pickerChecked.length > 0 && (
                   <button onClick={editId ? handleAddToExisting : confirmPickerToList}
                     className="w-full mt-2 py-2 rounded-xl bg-brand-500 text-white text-xs font-medium hover:bg-brand-600 transition-colors">
-                    + เพิ่ม {pickerChecked.length} คน {editId ? 'เข้า Course' : 'เข้ารายการ'}
+                    + Add {pickerChecked.length} {editId ? 'to Course' : 'to List'}
                   </button>
                 )}
               </div>

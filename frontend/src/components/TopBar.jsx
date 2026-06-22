@@ -16,7 +16,7 @@ const titles = {
 
 export default function TopBar({ user, onMenuClick }) {
   const { pathname } = useLocation();
-  const title = titles[pathname] || 'HemoLabs LMS';
+  const title = titles[pathname] || 'BTEC LMS';
 
   return (
     <div className="h-14 bg-white border-b border-slate-100 px-4 md:px-7 flex items-center justify-between flex-shrink-0" style={{ paddingTop: 'env(safe-area-inset-top)', height: 'calc(3.5rem + env(safe-area-inset-top))' }}>

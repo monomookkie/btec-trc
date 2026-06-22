@@ -188,7 +188,7 @@ export default function BrowseCourses({ user, showToast }) {
         ? { ...e, completedMaterials: JSON.stringify(result.completedMaterials), progress: result.progress, completed: result.completed ?? e.completed }
         : e
       ));
-      showToast('บันทึกเรียบร้อย');
+      showToast('Progress saved');
     } catch (_) {}
   };
 
@@ -257,7 +257,7 @@ export default function BrowseCourses({ user, showToast }) {
                   <p className="text-sm font-semibold text-navy-900 mb-1.5">{c.title}</p>
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <Badge variant="blue" className="text-[10px]">{c.category}</Badge>
-                    {hasQuiz && <Badge variant="purple" className="text-[10px]">มี Post-Test</Badge>}
+                    {hasQuiz && <Badge variant="purple" className="text-[10px]">Has Post-Test</Badge>}
                   </div>
                 </div>
                 {enr && (
@@ -274,7 +274,7 @@ export default function BrowseCourses({ user, showToast }) {
                 <span>Pass: {c.passScore}%</span>
                 <span>·</span>
                 <span>{(c.materials || []).length} materials</span>
-                {hasQuiz && <><span>·</span><span>{(c.questions || []).length} ข้อ</span></>}
+                {hasQuiz && <><span>·</span><span>{(c.questions || []).length} questions</span></>}
               </div>
               <div className="flex gap-2">
                 <button onClick={() => openCourse(c)} className="flex-1 py-2 rounded-xl border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors">
@@ -288,7 +288,7 @@ export default function BrowseCourses({ user, showToast }) {
                   <Badge variant="green" className="flex-1 justify-center py-2">Completed</Badge>
                 ) : enr.progress >= 100 && (c.questions || []).length > 0 && !enr.quizPassed ? (
                   <button onClick={() => openCourse(c)} className="flex-1 py-2 rounded-xl bg-purple-600 text-white text-xs font-medium hover:bg-purple-700 transition-colors">
-                    ทำ Post-Test
+                    Take Post-Test
                   </button>
                 ) : (
                   <Badge variant="amber" className="flex-1 justify-center py-2">In Progress</Badge>
@@ -341,7 +341,7 @@ export default function BrowseCourses({ user, showToast }) {
                             {(m.url && m.url !== '#' || m.dataUrl) && (
                               <button onClick={() => handleOpenMaterial(m, isDone)}
                                 className={`text-xs flex-shrink-0 transition-colors ${isDone ? 'text-emerald-600 hover:text-emerald-700' : 'text-brand-500 hover:text-brand-700'}`}>
-                                {m.dataUrl ? 'เปิดไฟล์ →' : getYouTubeEmbedUrl(m.url) ? (expandedMat === m.id ? 'ซ่อน ↑' : 'ดูวิดีโอ ▶') : 'Open →'}
+                                {m.dataUrl ? 'Open File →' : getYouTubeEmbedUrl(m.url) ? (expandedMat === m.id ? 'Hide ↑' : 'Watch ▶') : 'Open →'}
                               </button>
                             )}
                           </div>
@@ -405,12 +405,12 @@ export default function BrowseCourses({ user, showToast }) {
                                 <div className="flex items-center gap-2 pl-8">
                                   <button onClick={() => handleConfirmMaterial(m, enr)}
                                     className="text-[11px] px-3 py-1 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 font-medium transition-colors">
-                                    ✓ ยืนยันว่าศึกษาแล้ว
+                                    ✓ Mark as Completed
                                   </button>
                                 </div>
                               ) : (
                                 <div className="flex items-center gap-2 pl-8">
-                                  <span className="text-[11px] text-slate-400">ดูวิดีโอจนจบเพื่อยืนยัน</span>
+                                  <span className="text-[11px] text-slate-400">Watch video until the end to confirm</span>
                                 </div>
                               );
                             }
@@ -419,12 +419,12 @@ export default function BrowseCourses({ user, showToast }) {
                                 <div className="flex items-center gap-2 pl-8">
                                   {matCountdown[m.id] > 0 ? (
                                     <span className="text-[11px] text-slate-400">
-                                      ยืนยันได้ในอีก <span className="font-semibold text-amber-500">{matCountdown[m.id]}s</span>
+                                      Available in <span className="font-semibold text-amber-500">{matCountdown[m.id]}s</span>
                                     </span>
                                   ) : (
                                     <button onClick={() => handleConfirmMaterial(m, enr)}
                                       className="text-[11px] px-3 py-1 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 font-medium transition-colors">
-                                      ✓ ยืนยันว่าศึกษาแล้ว
+                                      ✓ Mark as Completed
                                     </button>
                                   )}
                                 </div>
@@ -445,10 +445,10 @@ export default function BrowseCourses({ user, showToast }) {
               <div className="bg-purple-50 border border-purple-100 rounded-xl p-4 mb-5">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-purple-600 text-sm font-semibold">Post-Test</span>
-                  <Badge variant="purple" className="text-[10px]">{viewCourse.questions.length} ข้อ</Badge>
+                  <Badge variant="purple" className="text-[10px]">{viewCourse.questions.length} questions</Badge>
                 </div>
                 <p className="text-xs text-purple-500">
-                  ต้องตอบถูกอย่างน้อย <strong>{viewCourse.quizRequired || viewCourse.questions.length}</strong> จาก {viewCourse.questions.length} ข้อ จึงจะผ่าน
+                  Must answer at least <strong>{viewCourse.quizRequired || viewCourse.questions.length}</strong> of {viewCourse.questions.length} questions correctly to pass
                 </p>
               </div>
             )}
@@ -461,16 +461,16 @@ export default function BrowseCourses({ user, showToast }) {
                 </button>
               ) : (
                 <>
-                  <p className="flex-1 text-center text-sm text-slate-500 self-center">คุณได้ลงทะเบียนแล้ว</p>
+                  <p className="flex-1 text-center text-sm text-slate-500 self-center">You are enrolled</p>
                   {(viewCourse.questions || []).length > 0 && (
                     getEnrollment(viewCourse.id)?.quizPassed ? (
                       <div className="flex-1 py-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 text-sm font-medium text-center">
-                        ✓ ผ่าน Post-Test แล้ว
+                        ✓ Post-Test Passed
                       </div>
                     ) : (
                       <button onClick={() => { setQuizMode(true); setQuizAnswers({}); setQuizResult(null); }}
                         className="flex-1 py-3 rounded-xl bg-purple-600 text-white text-sm font-medium hover:bg-purple-700">
-                        ทำ Post-Test
+                        Take Post-Test
                       </button>
                     )
                   )}
@@ -489,26 +489,26 @@ export default function BrowseCourses({ user, showToast }) {
                   {quizResult.correct}/{quizResult.total}
                 </div>
                 <p className={`text-lg font-semibold mb-1 ${quizResult.passed ? 'text-emerald-600' : 'text-red-600'}`}>
-                  {quizResult.passed ? 'ผ่านแล้ว!' : 'ยังไม่ผ่าน'}
+                  {quizResult.passed ? 'Passed!' : 'Not Passed'}
                 </p>
                 <p className="text-sm text-slate-500 mb-6">
-                  ตอบถูก {quizResult.correct} จาก {quizResult.total} ข้อ
-                  {!quizResult.passed && ` (ต้องผ่าน ${viewCourse.quizRequired || quizResult.total} ข้อ)`}
+                  {quizResult.correct} of {quizResult.total} correct
+                  {!quizResult.passed && ` (need ${viewCourse.quizRequired || quizResult.total} to pass)`}
                 </p>
                 <div className="flex gap-3 justify-center">
                   <button onClick={() => { setQuizAnswers({}); setQuizResult(null); }}
                     className="px-5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-600 hover:bg-slate-50">
-                    ทำใหม่
+                    Retake
                   </button>
                   <button onClick={() => { setQuizMode(false); setViewCourse(null); }}
                     className="px-5 py-2.5 rounded-xl bg-brand-500 text-white text-sm font-medium hover:bg-brand-600">
-                    เสร็จสิ้น
+                    Done
                   </button>
                 </div>
               </div>
             ) : (
               <>
-                <p className="text-xs text-slate-400 text-right">ต้องตอบถูก {viewCourse.quizRequired || viewCourse.questions.length}/{viewCourse.questions.length} ข้อ</p>
+                <p className="text-xs text-slate-400 text-right">Need {viewCourse.quizRequired || viewCourse.questions.length}/{viewCourse.questions.length} correct to pass</p>
                 {(viewCourse.questions || []).map((q, qi) => (
                   <div key={qi} className="border border-slate-100 rounded-xl p-4">
                     <p className="text-sm font-medium text-navy-900 mb-3">{qi + 1}. {q.question}</p>
@@ -528,12 +528,12 @@ export default function BrowseCourses({ user, showToast }) {
                 <div className="flex gap-3 pt-2 border-t border-slate-100">
                   <button onClick={() => setQuizMode(false)}
                     className="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-600 hover:bg-slate-50">
-                    ยกเลิก
+                    Cancel
                   </button>
                   <button onClick={submitQuiz}
                     disabled={Object.keys(quizAnswers).length < (viewCourse.questions || []).length}
                     className="flex-1 py-2.5 rounded-xl bg-purple-600 text-white text-sm font-medium hover:bg-purple-700 disabled:opacity-50">
-                    ส่งคำตอบ
+                    Submit
                   </button>
                 </div>
               </>

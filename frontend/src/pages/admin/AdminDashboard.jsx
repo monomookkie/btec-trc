@@ -55,7 +55,7 @@ export default function AdminDashboard({ showToast }) {
 
   const handleSaveAnn = async () => {
     if (!annForm.title.trim() || !annForm.content.trim()) {
-      showToast('กรุณากรอกหัวข้อและเนื้อหา', 'error');
+      showToast('Please fill in title and content', 'error');
       return;
     }
     setSaving(true);
@@ -63,14 +63,14 @@ export default function AdminDashboard({ showToast }) {
       if (editAnnId) {
         const updated = await api.updateAnnouncement(editAnnId, annForm);
         setAnnouncements(as => as.map(a => a.id === editAnnId ? updated : a));
-        showToast('อัปเดตประกาศแล้ว');
+        showToast('Announcement updated');
       } else {
         const created = await api.createAnnouncement(annForm);
         setAnnouncements(as => [created, ...as]);
-        showToast('โพสต์ประกาศแล้ว');
+        showToast('Announcement posted');
       }
       setShowAnnModal(false);
-    } catch { showToast('เกิดข้อผิดพลาด', 'error'); }
+    } catch { showToast('Something went wrong', 'error'); }
     finally { setSaving(false); }
   };
 
@@ -78,7 +78,7 @@ export default function AdminDashboard({ showToast }) {
     await api.deleteAnnouncement(confirmDelAnn);
     setAnnouncements(as => as.filter(a => a.id !== confirmDelAnn));
     setConfirmDelAnn(null);
-    showToast('ลบประกาศแล้ว');
+    showToast('Announcement deleted');
   };
 
   return (
@@ -152,15 +152,15 @@ export default function AdminDashboard({ showToast }) {
       {/* Announcements management */}
       <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-navy-900">ประกาศ / ข่าวสาร</h3>
+          <h3 className="text-sm font-semibold text-navy-900">Announcements</h3>
           <button onClick={openNewAnn}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-500 text-white rounded-lg text-xs font-medium hover:bg-brand-600">
-            <Icon name="plus" size={13} /> โพสต์ประกาศ
+            <Icon name="plus" size={13} /> Post Announcement
           </button>
         </div>
 
         {announcements.length === 0 && (
-          <p className="text-xs text-slate-400 text-center py-6">ยังไม่มีประกาศ</p>
+          <p className="text-xs text-slate-400 text-center py-6">No announcements yet.</p>
         )}
 
         <div className="space-y-3">
@@ -172,7 +172,7 @@ export default function AdminDashboard({ showToast }) {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <Badge variant={a.type === 'important' ? 'red' : 'blue'} className="text-[10px]">{a.type}</Badge>
-                  <span className="text-[10px] text-slate-400">{new Date(a.date).toLocaleDateString('th-TH')}</span>
+                  <span className="text-[10px] text-slate-400">{new Date(a.date).toLocaleDateString()}</span>
                 </div>
                 <p className="text-sm font-medium text-slate-800 mb-0.5">{a.title}</p>
                 <p className="text-xs text-slate-500 line-clamp-2">{a.content}</p>
@@ -192,7 +192,7 @@ export default function AdminDashboard({ showToast }) {
 
       {/* Announcement modal */}
       <Modal open={showAnnModal} onClose={() => setShowAnnModal(false)}
-        title={editAnnId ? 'แก้ไขประกาศ' : 'โพสต์ประกาศใหม่'} size="560px">
+        title={editAnnId ? 'Edit Announcement' : 'Post New Announcement'} size="560px">
         <div className="space-y-3">
           <div className="flex gap-2">
             {['info', 'important'].map(t => (
@@ -201,7 +201,7 @@ export default function AdminDashboard({ showToast }) {
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${annForm.type === t
                   ? t === 'important' ? 'bg-red-500 text-white border-red-500' : 'bg-brand-500 text-white border-brand-500'
                   : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`}>
-                {t === 'important' ? '🔴 สำคัญ' : '🔵 ทั่วไป'}
+                {t === 'important' ? '🔴 Important' : '🔵 General'}
               </button>
             ))}
           </div>
@@ -209,14 +209,14 @@ export default function AdminDashboard({ showToast }) {
           <input
             value={annForm.title}
             onChange={e => setAnnForm(f => ({ ...f, title: e.target.value }))}
-            placeholder="หัวข้อประกาศ *"
+            placeholder="Announcement title *"
             className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-brand-500"
           />
 
           <textarea
             value={annForm.content}
             onChange={e => setAnnForm(f => ({ ...f, content: e.target.value }))}
-            placeholder="เนื้อหาประกาศ *"
+            placeholder="Announcement content *"
             rows={4}
             className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-brand-500 resize-none"
           />
@@ -224,13 +224,13 @@ export default function AdminDashboard({ showToast }) {
           <input
             value={annForm.link}
             onChange={e => setAnnForm(f => ({ ...f, link: e.target.value }))}
-            placeholder="ลิงค์ (ไม่บังคับ) เช่น https://..."
+            placeholder="Link (optional) e.g. https://..."
             className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-brand-500"
           />
 
           {/* Image upload */}
           <div>
-            <p className="text-xs text-slate-500 mb-2">รูปภาพประกอบ (ไม่บังคับ)</p>
+            <p className="text-xs text-slate-500 mb-2">Image (optional)</p>
             {annForm.fileData && annForm.fileData.startsWith('data:image') && (
               <div className="relative mb-2 inline-block">
                 <img src={annForm.fileData} alt="" className="max-h-48 rounded-xl object-cover border border-slate-200" />
@@ -243,7 +243,7 @@ export default function AdminDashboard({ showToast }) {
             )}
             <label className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 cursor-pointer w-fit">
               <Icon name="upload" size={14} className="text-slate-400" />
-              <span className="text-xs text-slate-500">{annForm.fileName || 'เลือกรูปภาพ...'}</span>
+              <span className="text-xs text-slate-500">{annForm.fileName || 'Choose image...'}</span>
               <input type="file" className="hidden" accept="image/*"
                 onChange={e => {
                   const file = e.target.files[0];
@@ -270,11 +270,11 @@ export default function AdminDashboard({ showToast }) {
           <div className="flex justify-end gap-2 pt-2">
             <button onClick={() => setShowAnnModal(false)}
               className="px-4 py-2 rounded-xl border border-slate-200 text-sm text-slate-500 hover:bg-slate-50">
-              ยกเลิก
+              Cancel
             </button>
             <button onClick={handleSaveAnn} disabled={saving}
               className="px-5 py-2 rounded-xl bg-brand-500 text-white text-sm font-medium hover:bg-brand-600 disabled:opacity-60">
-              {saving ? 'กำลังบันทึก...' : editAnnId ? 'อัปเดต' : 'โพสต์'}
+              {saving ? 'Saving...' : editAnnId ? 'Update' : 'Post'}
             </button>
           </div>
         </div>
@@ -282,8 +282,8 @@ export default function AdminDashboard({ showToast }) {
 
       <ConfirmDialog
         open={!!confirmDelAnn}
-        title="ลบประกาศ"
-        message="ยืนยันลบประกาศนี้?"
+        title="Delete Announcement"
+        message="Are you sure you want to delete this announcement?"
         onConfirm={handleDeleteAnn}
         onCancel={() => setConfirmDelAnn(null)}
       />

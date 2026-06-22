@@ -63,9 +63,9 @@ function AnnouncementCarousel({ announcements }) {
                     <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
                       <div className="flex items-center gap-2 mb-2">
                         <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${ann.type === 'important' ? 'bg-red-500 text-white' : 'bg-white/20 text-white backdrop-blur-sm'}`}>
-                          {ann.type === 'important' ? 'สำคัญ' : 'ทั่วไป'}
+                          {ann.type === 'important' ? 'Important' : 'General'}
                         </span>
-                        <span className="text-[11px] text-white/70">{new Date(ann.date).toLocaleDateString('th-TH')}</span>
+                        <span className="text-[11px] text-white/70">{new Date(ann.date).toLocaleDateString()}</span>
                       </div>
                       <p className="text-white font-semibold text-base md:text-lg leading-snug">{ann.title}</p>
                       <p className="text-white/80 text-xs mt-1 line-clamp-2">{ann.content}</p>
@@ -76,9 +76,9 @@ function AnnouncementCarousel({ announcements }) {
                     <div className="max-w-2xl mx-auto">
                       <div className="flex items-center gap-2 mb-2">
                         <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${ann.type === 'important' ? 'bg-red-100 text-red-600' : 'bg-brand-100 text-brand-600'}`}>
-                          {ann.type === 'important' ? 'สำคัญ' : 'ทั่วไป'}
+                          {ann.type === 'important' ? 'Important' : 'General'}
                         </span>
-                        <span className="text-[11px] text-slate-400">{new Date(ann.date).toLocaleDateString('th-TH')}</span>
+                        <span className="text-[11px] text-slate-400">{new Date(ann.date).toLocaleDateString()}</span>
                       </div>
                       <p className="font-semibold text-slate-800 text-base mb-1">{ann.title}</p>
                       <p className="text-slate-500 text-sm whitespace-pre-wrap">{ann.content}</p>
@@ -170,7 +170,7 @@ export default function UserDashboard({ user, showToast }) {
             )}
           </div>
 
-          <p className="text-white/40 text-xs">แตะที่อื่นเพื่อปิด</p>
+          <p className="text-white/40 text-xs">Tap anywhere to close</p>
         </div>
       )}
 
@@ -223,22 +223,22 @@ export default function UserDashboard({ user, showToast }) {
         </div>
 
         <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
-          <h3 className="text-sm font-semibold text-navy-900 mb-4">สรุปผล</h3>
+          <h3 className="text-sm font-semibold text-navy-900 mb-4">Summary</h3>
           <div className="space-y-3">
             <div className="flex items-center justify-between py-2 border-b border-slate-50">
-              <span className="text-xs text-slate-500">หลักสูตรที่ลงทะเบียน</span>
+              <span className="text-xs text-slate-500">Enrolled Courses</span>
               <span className="text-sm font-bold text-navy-900">{enrollments.length}</span>
             </div>
             <div className="flex items-center justify-between py-2 border-b border-slate-50">
-              <span className="text-xs text-slate-500">ผ่านแล้ว</span>
+              <span className="text-xs text-slate-500">Completed</span>
               <span className="text-sm font-bold text-emerald-600">{completed.length}</span>
             </div>
             <div className="flex items-center justify-between py-2 border-b border-slate-50">
-              <span className="text-xs text-slate-500">กำลังเรียน</span>
+              <span className="text-xs text-slate-500">In Progress</span>
               <span className="text-sm font-bold text-blue-600">{inProgress.length}</span>
             </div>
             <div className="flex items-center justify-between py-2">
-              <span className="text-xs text-slate-500">ใบประกาศนียบัตร</span>
+              <span className="text-xs text-slate-500">Certificates</span>
               <span className="text-sm font-bold text-amber-500">{certs.length}</span>
             </div>
           </div>
