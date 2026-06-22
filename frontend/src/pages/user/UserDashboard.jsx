@@ -150,44 +150,24 @@ export default function UserDashboard({ user, showToast }) {
     <div className="p-4 md:p-7 page-enter">
 
       {/* Announcement Popup */}
-      {popupAnn && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center"
-          style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)', padding: 24 }}
+      {popupAnn && popupAnn.fileData && popupAnn.fileData.startsWith('data:image') && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }}
           onClick={closePopup}>
-          <div className="bg-white rounded-2xl shadow-2xl overflow-hidden"
-            style={{ width: '100%', maxWidth: 520 }}
-            onClick={e => e.stopPropagation()}>
-
-            <div className="flex items-center justify-between px-6 pt-5 pb-3">
-              <div className="flex items-center gap-2">
-                <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${popupAnn.type === 'important' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}`}>
-                  {popupAnn.type === 'important' ? 'สำคัญ' : 'ประกาศ'}
-                </span>
-                <span className="text-xs text-slate-400">{new Date(popupAnn.date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-              </div>
-              <button onClick={closePopup}
-                className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 text-lg flex items-center justify-center transition-colors border-0">
-                ×
-              </button>
-            </div>
-
-            {popupAnn.fileData && popupAnn.fileData.startsWith('data:image') && (
-              <div className="mx-6 rounded-xl overflow-hidden" style={{ height: 240 }}>
-                <img src={popupAnn.fileData} alt={popupAnn.title} className="w-full h-full object-cover" />
-              </div>
+          <div className="relative" onClick={e => e.stopPropagation()}>
+            <button onClick={closePopup}
+              className="absolute -top-3 -right-3 z-10 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-slate-700 text-lg font-bold flex items-center justify-center shadow-lg border-0">
+              ×
+            </button>
+            {popupAnn.link ? (
+              <a href={popupAnn.link} target="_blank" rel="noopener noreferrer" onClick={closePopup}>
+                <img src={popupAnn.fileData} alt={popupAnn.title}
+                  className="rounded-2xl shadow-2xl max-h-[80vh] max-w-[90vw] object-contain cursor-pointer" />
+              </a>
+            ) : (
+              <img src={popupAnn.fileData} alt={popupAnn.title}
+                className="rounded-2xl shadow-2xl max-h-[80vh] max-w-[90vw] object-contain" />
             )}
-
-            <div className="px-6 py-4">
-              <p className="text-slate-800 font-bold text-lg mb-1.5">{popupAnn.title}</p>
-              <p className="text-slate-500 text-sm leading-relaxed whitespace-pre-wrap">{popupAnn.content}</p>
-              {popupAnn.link && (
-                <a href={popupAnn.link} target="_blank" rel="noopener noreferrer" onClick={closePopup}
-                  className="inline-block mt-4 px-5 py-2 rounded-xl bg-brand-500 text-white text-sm font-semibold hover:bg-brand-600 transition-colors no-underline">
-                  ดูรายละเอียด →
-                </a>
-              )}
-            </div>
-            <div className="pb-2" />
           </div>
         </div>
       )}
