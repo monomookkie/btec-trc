@@ -40,7 +40,7 @@ function AnnouncementCarousel({ announcements }) {
   const hasImage = a.fileData && a.fileData.startsWith('data:image');
 
   return (
-    <div className="mb-6">
+    <div className="mb-4">
       <div className="relative overflow-hidden rounded-2xl shadow-sm select-none"
         onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
 
@@ -54,35 +54,30 @@ function AnnouncementCarousel({ announcements }) {
                 onClick={() => ann.link && window.open(ann.link, '_blank', 'noopener,noreferrer')}
                 style={{ cursor: ann.link ? 'pointer' : 'default' }}>
                 {img ? (
-                  <div className="relative w-full" style={{ aspectRatio: '16/6' }}>
+                  <div className="relative w-full overflow-hidden rounded-2xl" style={{ height: 'clamp(140px, 22vh, 220px)' }}>
                     <img src={ann.fileData} alt={ann.title}
-                      className="absolute inset-0 w-full h-full object-cover"
-                      style={{ imageRendering: 'auto' }} />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                    {/* Text on image */}
-                    <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${ann.type === 'important' ? 'bg-red-500 text-white' : 'bg-white/20 text-white backdrop-blur-sm'}`}>
+                      className="absolute inset-0 w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-3 md:p-5">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full ${ann.type === 'important' ? 'bg-red-500 text-white' : 'bg-white/20 text-white backdrop-blur-sm'}`}>
                           {ann.type === 'important' ? 'Important' : 'General'}
                         </span>
-                        <span className="text-[11px] text-white/70">{new Date(ann.date).toLocaleDateString()}</span>
+                        <span className="text-[10px] text-white/60">{new Date(ann.date).toLocaleDateString()}</span>
                       </div>
-                      <p className="text-white font-semibold text-base md:text-lg leading-snug">{ann.title}</p>
-                      <p className="text-white/80 text-xs mt-1 line-clamp-2">{ann.content}</p>
+                      <p className="text-white font-semibold text-sm md:text-base leading-snug line-clamp-1">{ann.title}</p>
                     </div>
                   </div>
                 ) : (
-                  <div className={`px-5 md:px-7 py-8 ${ann.type === 'important' ? 'bg-red-50' : 'bg-gradient-to-r from-brand-50 to-slate-50'}`}>
-                    <div className="max-w-2xl mx-auto">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${ann.type === 'important' ? 'bg-red-100 text-red-600' : 'bg-brand-100 text-brand-600'}`}>
-                          {ann.type === 'important' ? 'Important' : 'General'}
-                        </span>
-                        <span className="text-[11px] text-slate-400">{new Date(ann.date).toLocaleDateString()}</span>
-                      </div>
-                      <p className="font-semibold text-slate-800 text-base mb-1">{ann.title}</p>
-                      <p className="text-slate-500 text-sm whitespace-pre-wrap">{ann.content}</p>
+                  <div className={`px-5 md:px-7 py-5 ${ann.type === 'important' ? 'bg-red-50' : 'bg-gradient-to-r from-brand-50 to-slate-50'}`}>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full ${ann.type === 'important' ? 'bg-red-100 text-red-600' : 'bg-brand-100 text-brand-600'}`}>
+                        {ann.type === 'important' ? 'Important' : 'General'}
+                      </span>
+                      <span className="text-[10px] text-slate-400">{new Date(ann.date).toLocaleDateString()}</span>
                     </div>
+                    <p className="font-semibold text-slate-800 text-sm mb-1">{ann.title}</p>
+                    <p className="text-slate-500 text-xs line-clamp-2">{ann.content}</p>
                   </div>
                 )}
               </div>
@@ -94,11 +89,11 @@ function AnnouncementCarousel({ announcements }) {
         {announcements.length > 1 && (
           <>
             <button onClick={prev}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/30 hover:bg-black/50 text-white flex items-center justify-center text-lg transition-colors z-10">
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/30 hover:bg-black/50 text-white flex items-center justify-center text-base transition-colors z-10">
               ‹
             </button>
             <button onClick={next}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/30 hover:bg-black/50 text-white flex items-center justify-center text-lg transition-colors z-10">
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/30 hover:bg-black/50 text-white flex items-center justify-center text-base transition-colors z-10">
               ›
             </button>
           </>
@@ -107,10 +102,10 @@ function AnnouncementCarousel({ announcements }) {
 
       {/* Dots */}
       {announcements.length > 1 && (
-        <div className="flex justify-center gap-1.5 mt-2.5">
+        <div className="flex justify-center gap-1.5 mt-2">
           {announcements.map((_, i) => (
             <button key={i} onClick={() => goTo(i)}
-              className={`rounded-full transition-all duration-300 ${i === current ? 'w-5 h-2 bg-brand-500' : 'w-2 h-2 bg-slate-300 hover:bg-slate-400'}`} />
+              className={`rounded-full transition-all duration-300 ${i === current ? 'w-4 h-1.5 bg-brand-500' : 'w-1.5 h-1.5 bg-slate-300 hover:bg-slate-400'}`} />
           ))}
         </div>
       )}
