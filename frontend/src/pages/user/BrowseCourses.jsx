@@ -77,8 +77,13 @@ export default function BrowseCourses({ user, showToast }) {
   const toggleYtFullscreen = (materialId) => {
     const el = ytContainerRefs.current[materialId];
     if (!el) return;
-    if (document.fullscreenElement) document.exitFullscreen();
-    else el.requestFullscreen();
+    const exitFs = document.exitFullscreen || document.webkitExitFullscreen;
+    const enterFs = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      exitFs && exitFs.call(document);
+      return;
+    }
+    else enterFs && enterFs.call(el);
   };
 
   // Listen for YouTube video ended event (state = 0)
@@ -354,14 +359,20 @@ export default function BrowseCourses({ user, showToast }) {
                                 className="w-full h-full pointer-events-none"
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                               />
-                              {/* Transparent area — play/pause + show controls on touch */}
-                              <div className="absolute inset-0 bottom-12 cursor-pointer"
+                              {/* Transparent overlay — desktop click = play/pause, mobile touch = show controls first */}
+                              <div className="absolute inset-0 bottom-14 cursor-pointer"
                                 onClick={() => toggleYtPlay(m.id)}
-                                onTouchStart={() => showControls(m.id)} />
-                              {/* Control bar — hidden, shows on hover/touch */}
+                                onTouchEnd={e => {
+                                  e.preventDefault();
+                                  if (ytShowControls[m.id]) toggleYtPlay(m.id);
+                                  else showControls(m.id);
+                                }} />
+                              {/* Control bar */}
                               <div className={`absolute bottom-0 left-0 right-0 flex items-center gap-3 px-4 py-3 bg-gradient-to-t from-black/80 to-transparent transition-opacity duration-300 ${ytShowControls[m.id] ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-                                <button onClick={() => toggleYtPlay(m.id)}
-                                  className="text-white hover:text-white/80 transition-colors text-base w-6 text-center select-none">
+                                <button
+                                  onClick={e => { e.stopPropagation(); toggleYtPlay(m.id); }}
+                                  onTouchEnd={e => { e.preventDefault(); e.stopPropagation(); toggleYtPlay(m.id); }}
+                                  className="text-white text-xl w-10 h-10 flex items-center justify-center select-none">
                                   {ytPlaying[m.id] ? '⏸' : '▶'}
                                 </button>
                                 <span className="text-white text-sm select-none">
@@ -372,11 +383,13 @@ export default function BrowseCourses({ user, showToast }) {
                                   value={ytVolume[m.id] ?? 100}
                                   onChange={e => changeYtVolume(m.id, Number(e.target.value))}
                                   onTouchStart={e => e.stopPropagation()}
-                                  className="w-24 accent-white cursor-pointer"
+                                  onTouchMove={e => { e.stopPropagation(); changeYtVolume(m.id, Number(e.target.value)); }}
+                                  className="flex-1 accent-white cursor-pointer h-1.5"
                                 />
-                                <div className="flex-1" />
-                                <button onClick={() => toggleYtFullscreen(m.id)}
-                                  className="text-white hover:text-white/80 transition-colors text-lg select-none">
+                                <button
+                                  onClick={e => { e.stopPropagation(); toggleYtFullscreen(m.id); }}
+                                  onTouchEnd={e => { e.preventDefault(); e.stopPropagation(); toggleYtFullscreen(m.id); }}
+                                  className="text-white text-xl w-10 h-10 flex items-center justify-center select-none">
                                   ⛶
                                 </button>
                               </div>
