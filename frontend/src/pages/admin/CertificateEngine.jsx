@@ -10,7 +10,7 @@ import { CertificateEngineSkeleton } from '../../components/ui/Skeleton';
 export default function CertificateEngine({ showToast }) {
   const [certs, setCerts] = useState([]);
   const [enrollments, setEnrollments] = useState([]);
-  const [templates, setTemplates] = useState([]);
+
   const [externalCerts, setExternalCerts] = useState([]);
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState('');
@@ -28,10 +28,9 @@ export default function CertificateEngine({ showToast }) {
   const [initLoading, setInitLoading] = useState(true);
 
   const load = async () => {
-    const [c, e, t, ex, u] = await Promise.all([api.getCertificates(), api.getEnrollments(), api.getCertTemplates(), api.getAllExternalCerts(), api.getUsers()]);
+    const [c, e, ex, u] = await Promise.all([api.getCertificates(), api.getEnrollments(), api.getAllExternalCerts(), api.getUsers()]);
     setCerts(c);
     setEnrollments(e.filter(e => e.completed && !e.certificate));
-    setTemplates(t);
     setExternalCerts(ex);
     setUsers(u);
   };
@@ -99,7 +98,7 @@ export default function CertificateEngine({ showToast }) {
 
       {/* Tabs */}
       <div className="flex gap-2 mb-5">
-        {[['certs','Certificates'],['external','External Certs'],['templates','Templates']].map(([k,l]) => (
+        {[['certs','Certificates'],['external','External Certs']].map(([k,l]) => (
           <button key={k} onClick={() => setTab(k)}
             className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-colors ${tab === k ? 'bg-brand-500 text-white' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50'}`}>
             {l}
@@ -217,25 +216,6 @@ export default function CertificateEngine({ showToast }) {
             </tbody>
           </table>
           {externalCerts.length === 0 && <div className="text-center py-12 text-slate-400 text-sm">No external certificates.</div>}
-        </div>
-      )}
-
-      {tab === 'templates' && (
-        <div className="space-y-3">
-          {templates.map(t => (
-            <div key={t.id} className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center font-mono font-bold text-white text-sm flex-shrink-0"
-                style={{ background: t.primaryColor }}>{t.logoText}</div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span className="text-sm font-medium text-navy-900">{t.name}</span>
-                  {t.isDefault && <Badge variant="blue">Default</Badge>}
-                </div>
-                <div className="text-xs text-slate-400">{t.orgName} · {t.signatory}</div>
-              </div>
-            </div>
-          ))}
-          {templates.length === 0 && <div className="text-center py-12 text-slate-400 text-sm">No templates yet.</div>}
         </div>
       )}
 

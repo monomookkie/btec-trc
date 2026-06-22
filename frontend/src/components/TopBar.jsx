@@ -30,9 +30,9 @@ export default function TopBar({ user, onMenuClick }) {
           <span className="text-sm font-semibold text-navy-900">{title}</span>
         </div>
       </div>
-      <Badge variant={user.role === 'ADMIN' ? 'red' : 'blue'}>
-        {user.role === 'ADMIN' ? 'Administrator' : 'User'}
-      </Badge>
+      {user.role === 'ADMIN' && (
+        <Badge variant="red">Administrator</Badge>
+      )}
     </div>
   );
 }
