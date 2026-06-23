@@ -64,7 +64,7 @@ function AnnouncementCarousel({ announcements }) {
                         <span className={`text-[11px] font-bold px-3 py-1 rounded-full tracking-wide ${ann.type === 'important' ? 'bg-red-500 text-white' : 'bg-brand-100 text-brand-600'}`}>
                           {ann.type === 'important' ? '🔴 Important' : '📢 General'}
                         </span>
-                        <span className="text-[11px] text-slate-400">{new Date(ann.date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                        <span className="text-[11px] text-slate-400">{new Date(ann.date).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
                       </div>
                       <p className="font-bold text-slate-900 text-base md:text-lg leading-snug mb-1 line-clamp-1">{ann.title}</p>
                       {ann.content && <p className="text-slate-500 text-xs leading-relaxed line-clamp-2">{ann.content}</p>}
