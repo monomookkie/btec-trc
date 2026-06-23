@@ -54,9 +54,9 @@ function AnnouncementCarousel({ announcements }) {
                 onClick={() => ann.link && window.open(ann.link, '_blank', 'noopener,noreferrer')}
                 style={{ cursor: ann.link ? 'pointer' : 'default' }}>
                 {img ? (
-                  <div className="relative w-full overflow-hidden rounded-2xl bg-black" style={{ height: 'clamp(140px, 22vh, 220px)' }}>
+                  <div className="relative w-full overflow-hidden rounded-2xl" style={{ aspectRatio: '16/9', maxHeight: '340px' }}>
                     <img src={ann.fileData} alt={ann.title}
-                      className="absolute inset-0 w-full h-full object-contain" />
+                      className="absolute inset-0 w-full h-full object-cover object-center" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-3 md:p-5">
                       <div className="flex items-center gap-2 mb-1">
