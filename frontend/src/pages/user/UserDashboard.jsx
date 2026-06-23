@@ -54,7 +54,7 @@ function AnnouncementCarousel({ announcements }) {
                 onClick={() => ann.link && window.open(ann.link, '_blank', 'noopener,noreferrer')}
                 style={{ cursor: ann.link ? 'pointer' : 'default' }}>
                 {img ? (
-                  <div className="relative overflow-hidden rounded-2xl mx-auto" style={{ aspectRatio: '16/9', maxHeight: '340px', maxWidth: '75%' }}>
+                  <div className="relative overflow-hidden rounded-2xl mx-auto" style={{ aspectRatio: '16/9', maxHeight: '340px', maxWidth: '88%' }}>
                     {/* Blurred background */}
                     <img src={ann.fileData} alt="" aria-hidden="true"
                       className="absolute inset-0 w-full h-full object-cover scale-110 blur-2xl opacity-90" />
@@ -70,6 +70,7 @@ function AnnouncementCarousel({ announcements }) {
                         <span className="text-[10px] text-white/60">{new Date(ann.date).toLocaleDateString()}</span>
                       </div>
                       <p className="text-white font-semibold text-sm md:text-base leading-snug line-clamp-1">{ann.title}</p>
+                      {ann.content && <p className="text-white/75 text-xs mt-0.5 line-clamp-2">{ann.content}</p>}
                     </div>
                   </div>
                 ) : (
