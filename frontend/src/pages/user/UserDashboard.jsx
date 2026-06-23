@@ -41,7 +41,11 @@ function AnnouncementCarousel({ announcements }) {
 
   return (
     <div className="mb-4 max-w-2xl mx-auto">
-      <div className="relative overflow-hidden rounded-2xl shadow-sm select-none"
+      <div className="flex items-center gap-2 mb-3">
+        <span className="w-1 h-5 rounded-full bg-red-500 inline-block" />
+        <h2 className="text-sm font-bold text-slate-700 uppercase tracking-widest">Announcements</h2>
+      </div>
+      <div className="relative overflow-hidden rounded-2xl shadow-sm select-none border border-slate-100"
         onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
 
         {/* Slides */}
@@ -55,15 +59,15 @@ function AnnouncementCarousel({ announcements }) {
                 style={{ cursor: ann.link ? 'pointer' : 'default' }}>
                 {img ? (
                   <div className="w-full">
-                    <div className="px-5 md:px-7 pt-4 pb-3">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className={`text-xs font-bold px-3 py-1 rounded-full ${ann.type === 'important' ? 'bg-red-500 text-white' : 'bg-brand-100 text-brand-600'}`}>
-                          {ann.type === 'important' ? 'Important' : 'General'}
+                    <div className="px-5 md:px-6 pt-4 pb-3 border-b border-slate-100">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className={`text-[11px] font-bold px-3 py-1 rounded-full tracking-wide ${ann.type === 'important' ? 'bg-red-500 text-white' : 'bg-brand-100 text-brand-600'}`}>
+                          {ann.type === 'important' ? '🔴 Important' : '📢 General'}
                         </span>
-                        <span className="text-xs text-slate-400">{new Date(ann.date).toLocaleDateString()}</span>
+                        <span className="text-[11px] text-slate-400">{new Date(ann.date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
                       </div>
-                      <p className="font-bold text-slate-900 text-xl md:text-2xl mb-1 line-clamp-1">{ann.title}</p>
-                      {ann.content && <p className="text-slate-500 text-sm line-clamp-2">{ann.content}</p>}
+                      <p className="font-bold text-slate-900 text-base md:text-lg leading-snug mb-1 line-clamp-1">{ann.title}</p>
+                      {ann.content && <p className="text-slate-500 text-xs leading-relaxed line-clamp-2">{ann.content}</p>}
                     </div>
                     <div className="group relative w-full overflow-hidden aspect-video">
                       <img src={ann.fileData} alt="" aria-hidden="true"
